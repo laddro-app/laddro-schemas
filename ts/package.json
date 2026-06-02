@@ -1,0 +1,40 @@
+{
+  "name": "@laddro-app/schemas",
+  "version": "0.1.0",
+  "description": "Shared OpenAPI 3.1 schemas for Laddro APIs (resume, cover letter, template).",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./resume": {
+      "types": "./dist/resume.gen.d.ts",
+      "default": "./dist/resume.gen.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
+  "scripts": {
+    "generate": "bash ../scripts/generate-ts.sh",
+    "build": "tsc -p tsconfig.json",
+    "prepublishOnly": "npm run generate && npm run build"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.0.0",
+    "typescript": "^5.5.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/laddro-app/laddro-schemas.git",
+    "directory": "ts"
+  }
+}

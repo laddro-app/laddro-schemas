@@ -1,0 +1,7 @@
+package: resume
+output: resume.gen.go
+generate:
+  models: true
+  embedded-spec: false
+output-options:
+  skip-prune: true
