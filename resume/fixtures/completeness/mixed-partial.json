@@ -1,0 +1,48 @@
+{
+  "notes": "Personal full (20) + summary (5) + employment best item 5/5 (25) + education best item 5/5 (15) + skills with one filled item 1/1 (15) = 80.",
+  "input": {
+    "title": "Untitled",
+    "locale": "en",
+    "personal": {
+      "role": "Senior Backend Engineer",
+      "firstName": "Oussama",
+      "lastName": "Benhamouda",
+      "email": "oussama@example.com"
+    },
+    "summary": { "value": "Backend engineer with 8 years of experience." },
+    "sections": [
+      {
+        "type": "employment",
+        "items": [
+          {
+            "company": "Qonto",
+            "position": "Senior Backend Engineer",
+            "startDate": "2022-03",
+            "endDate": null,
+            "current": true,
+            "description": "Led payments migration."
+          }
+        ]
+      },
+      {
+        "type": "education",
+        "items": [
+          {
+            "institution": "TU Berlin",
+            "degree": "M.Sc.",
+            "major": "CS",
+            "startDate": "2014-09",
+            "endDate": "2016-07"
+          }
+        ]
+      },
+      {
+        "type": "skills",
+        "items": [
+          { "skill": "Go" }
+        ]
+      }
+    ]
+  },
+  "expected": 80
+}

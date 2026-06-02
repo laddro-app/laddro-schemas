@@ -1,0 +1,11 @@
+{
+  "notes": "Empty resume — every section absent, summary blank. Total score is 0.",
+  "input": {
+    "title": "Untitled",
+    "locale": "en",
+    "personal": {},
+    "summary": { "value": "" },
+    "sections": []
+  },
+  "expected": 0
+}

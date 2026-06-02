@@ -1,0 +1,11 @@
+{
+  "notes": "Multiple resumes — at least one is ≥ 70%, so allowed.",
+  "input": {
+    "resumes": [
+      { "completeness": 30 },
+      { "completeness": 80 },
+      { "completeness": 60 }
+    ]
+  },
+  "expected": { "allowed": true }
+}

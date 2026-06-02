@@ -1,0 +1,7 @@
+{
+  "notes": "User has no resumes — always allowed to create the first one.",
+  "input": {
+    "resumes": []
+  },
+  "expected": { "allowed": true }
+}

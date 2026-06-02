@@ -1,0 +1,114 @@
+{
+  "notes": "Every section filled with proper data. Raw weighted sum exceeds 100 (sum of all weights = 105), so the result is capped at 100.",
+  "input": {
+    "title": "Senior Backend Engineer Resume",
+    "locale": "en",
+    "templateId": "emerald",
+    "personal": {
+      "role": "Senior Backend Engineer",
+      "firstName": "Oussama",
+      "lastName": "Benhamouda",
+      "email": "oussama@example.com",
+      "phone": "+49 170 0000000",
+      "city": "Berlin",
+      "country": "Germany",
+      "website": "https://oussama.dev",
+      "linkedin": "https://linkedin.com/in/oussama"
+    },
+    "summary": { "value": "Backend engineer with 8 years building distributed systems." },
+    "sections": [
+      {
+        "type": "employment",
+        "items": [
+          {
+            "company": "Qonto",
+            "position": "Senior Backend Engineer",
+            "startDate": "2022-03",
+            "endDate": null,
+            "current": true,
+            "city": "Berlin",
+            "description": "Led the payments migration; reduced p99 by 40%."
+          }
+        ]
+      },
+      {
+        "type": "education",
+        "items": [
+          {
+            "institution": "TU Berlin",
+            "degree": "M.Sc.",
+            "major": "Computer Science",
+            "startDate": "2014-09",
+            "endDate": "2016-07",
+            "city": "Berlin",
+            "description": "Thesis on distributed consensus."
+          }
+        ]
+      },
+      {
+        "type": "skills",
+        "items": [
+          { "skill": "Go" },
+          { "skill": "PostgreSQL" },
+          { "skill": "Kubernetes" }
+        ]
+      },
+      {
+        "type": "languages",
+        "items": [
+          { "language": "English", "level": "Native" },
+          { "language": "German", "level": "B2" }
+        ]
+      },
+      {
+        "type": "certifications",
+        "items": [
+          {
+            "certification": "AWS Solutions Architect",
+            "institution": "Amazon",
+            "startDate": "2023-04",
+            "endDate": "2026-04",
+            "description": ""
+          }
+        ]
+      },
+      {
+        "type": "projects",
+        "items": [
+          {
+            "title": "Laddro",
+            "description": "AI-powered career platform.",
+            "startDate": "2025-01",
+            "endDate": null,
+            "current": true
+          }
+        ]
+      },
+      {
+        "type": "extraCurricularActivities",
+        "items": [
+          {
+            "activity": "Open-source maintainer — go-chi",
+            "startDate": "2020-01",
+            "endDate": null,
+            "current": true,
+            "description": ""
+          }
+        ]
+      },
+      {
+        "type": "references",
+        "items": [
+          {
+            "name": "Jane Doe",
+            "position": "Engineering Manager",
+            "company": "Qonto",
+            "email": "jane@qonto.com",
+            "phone": "+33 1 23 45 67 89"
+          }
+        ]
+      }
+    ]
+  },
+  "expected": 100
+}

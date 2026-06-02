@@ -1,0 +1,16 @@
+{
+  "notes": "Personal full (20) + Summary value present (5). Total = 25.",
+  "input": {
+    "title": "Untitled",
+    "locale": "en",
+    "personal": {
+      "role": "Senior Backend Engineer",
+      "firstName": "Oussama",
+      "lastName": "Benhamouda",
+      "email": "oussama@example.com"
+    },
+    "summary": { "value": "Backend engineer with 8 years of experience." },
+    "sections": []
+  },
+  "expected": 25
+}

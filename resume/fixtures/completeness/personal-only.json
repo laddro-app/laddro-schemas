@@ -1,0 +1,16 @@
+{
+  "notes": "Personal section fully filled (4 of 4 score boosters: role, firstName, lastName, email). Other sections empty. 4/4 * 20 = 20.",
+  "input": {
+    "title": "Untitled",
+    "locale": "en",
+    "personal": {
+      "role": "Senior Backend Engineer",
+      "firstName": "Oussama",
+      "lastName": "Benhamouda",
+      "email": "oussama@example.com"
+    },
+    "summary": { "value": "" },
+    "sections": []
+  },
+  "expected": 20
+}

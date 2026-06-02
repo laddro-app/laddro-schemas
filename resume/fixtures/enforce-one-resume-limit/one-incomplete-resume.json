@@ -1,0 +1,9 @@
+{
+  "notes": "Single existing resume below the 70% threshold — blocked from creating another.",
+  "input": {
+    "resumes": [
+      { "completeness": 50 }
+    ]
+  },
+  "expected": { "allowed": false }
+}

@@ -1,0 +1,9 @@
+{
+  "notes": "Single existing resume at or above 70% — user is allowed to create another.",
+  "input": {
+    "resumes": [
+      { "completeness": 75 }
+    ]
+  },
+  "expected": { "allowed": true }
+}

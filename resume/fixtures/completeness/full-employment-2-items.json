@@ -1,0 +1,40 @@
+{
+  "notes": "Personal full (20) + summary (5) + employment with two items where the best item fills 5 of 5 score boosters (company, position, startDate, endDate, description) → 25. Other sections empty. Total = 50.",
+  "input": {
+    "title": "Untitled",
+    "locale": "en",
+    "personal": {
+      "role": "Senior Backend Engineer",
+      "firstName": "Oussama",
+      "lastName": "Benhamouda",
+      "email": "oussama@example.com"
+    },
+    "summary": { "value": "Backend engineer with 8 years of experience." },
+    "sections": [
+      {
+        "type": "employment",
+        "items": [
+          {
+            "company": "Qonto",
+            "position": "Senior Backend Engineer",
+            "startDate": "2022-03",
+            "endDate": null,
+            "current": true,
+            "city": "Berlin",
+            "description": "Led migration of payments service."
+          },
+          {
+            "company": "Finway",
+            "position": "Backend Engineer",
+            "startDate": "2020-01",
+            "endDate": "2022-02",
+            "current": false,
+            "city": "Berlin",
+            "description": "Built invoicing module from scratch."
+          }
+        ]
+      }
+    ]
+  },
+  "expected": 50
+}

@@ -1,0 +1,9 @@
+{
+  "notes": "Resume exactly at the 70 threshold — allowed (rule is ≥ 70, not > 70).",
+  "input": {
+    "resumes": [
+      { "completeness": 70 }
+    ]
+  },
+  "expected": { "allowed": true }
+}
