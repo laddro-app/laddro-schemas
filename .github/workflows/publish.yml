@@ -1,0 +1,46 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  publish-ts:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@laddro-app'
+      - name: Generate types
+        run: bash scripts/generate-ts.sh
+      - name: Install + build
+        working-directory: ts
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+      - name: Publish to GitHub Packages
+        working-directory: ts
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm publish
+
+  verify-go-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with: { go-version: '1.22' }
+      - name: Confirm Go module path resolves at this tag
+        run: |
+          echo "Go modules consume the tag directly via go get."
+          echo "Tag: ${GITHUB_REF#refs/tags/}"
+          go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest
+          bash scripts/generate-go.sh
+          cd go && go build ./...

@@ -1,0 +1,53 @@
+name: Verify
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  openapi-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: Lint resume.v1.yaml
+        run: npx --yes @redocly/cli@latest lint resume/resume.v1.yaml
+
+  ts-codegen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: Generate TS types
+        run: bash scripts/generate-ts.sh
+      - name: Install + build TS package
+        working-directory: ts
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+
+  go-codegen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with: { go-version: '1.22' }
+      - name: Install oapi-codegen
+        run: go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest
+      - name: Generate Go types
+        run: bash scripts/generate-go.sh
+      - name: Build Go module
+        working-directory: go
+        run: go build ./...
+
+  fixtures-shape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate fixture JSON
+        run: |
+          find resume/fixtures -name '*.json' -print0 |
+            xargs -0 -I {} sh -c 'echo "Validating {}" && python3 -m json.tool {} >/dev/null'
