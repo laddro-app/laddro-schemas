@@ -1,0 +1,322 @@
+openapi: 3.1.0
+info:
+  title: Laddro Resume Schema
+  version: 1.0.0
+  description: |
+    Canonical Resume DTO consumed by laddro-web-app, laddro-backend, and
+    laddro-career-api. Generated types are published to @laddro-app/schemas
+    (npm) and github.com/laddro-app/laddro-schemas/go.
+
+    Ordering rule: array position determines display order at every level.
+    `personal` and `summary` are structural top-level fields and always render
+    first, in that order. `sections[]` is the reorderable list — array index
+    is the section's display position. Items inside each section also use
+    array order.
+
+components:
+  schemas:
+    Resume:
+      type: object
+      required: [title, locale, personal, summary]
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+          example: Senior Backend Engineer Resume
+        locale:
+          type: string
+          enum: [en, de, es, fr, it, nl, pl, pt, is, fi, sv, no, da, et]
+        templateId:
+          type: string
+          default: emerald
+          description: |
+            Slug from the template catalog. Defaults to `emerald` when
+            omitted. The read path always returns a resolved templateId.
+        isDefault:
+          type: boolean
+          default: false
+        personal:
+          $ref: '#/components/schemas/PersonalSection'
+        summary:
+          $ref: '#/components/schemas/SummarySection'
+        sections:
+          type: array
+          description: |
+            Reorderable sections. Array position IS the display order — no
+            per-section `order` field. `personal` and `summary` are top-level
+            and not part of this array.
+          items:
+            $ref: '#/components/schemas/ReorderableSection'
+        styling:
+          $ref: '#/components/schemas/Styling'
+        completeness:
+          type: integer
+          minimum: 0
+          maximum: 100
+          readOnly: true
+        guidedFlowStatus:
+          type: string
+          enum: [in_progress, completed]
+          nullable: true
+          readOnly: true
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+
+    PersonalSection:
+      type: object
+      properties:
+        role:      { type: string }
+        firstName: { type: string }
+        lastName:  { type: string }
+        email:     { type: string, format: email }
+        phone:     { type: string }
+        city:      { type: string }
+        country:   { type: string }
+        website:   { type: string, format: uri }
+        linkedin:  { type: string, format: uri }
+
+    SummarySection:
+      type: object
+      properties:
+        value:
+          type: string
+          description: Plain text professional summary.
+
+    ReorderableSection:
+      oneOf:
+        - $ref: '#/components/schemas/EmploymentSection'
+        - $ref: '#/components/schemas/EducationSection'
+        - $ref: '#/components/schemas/SkillsSection'
+        - $ref: '#/components/schemas/LanguagesSection'
+        - $ref: '#/components/schemas/CertificationsSection'
+        - $ref: '#/components/schemas/ProjectsSection'
+        - $ref: '#/components/schemas/ReferencesSection'
+        - $ref: '#/components/schemas/ExtraCurricularActivitiesSection'
+        - $ref: '#/components/schemas/CustomSection'
+      discriminator:
+        propertyName: type
+        mapping:
+          employment:                '#/components/schemas/EmploymentSection'
+          education:                 '#/components/schemas/EducationSection'
+          skills:                    '#/components/schemas/SkillsSection'
+          languages:                 '#/components/schemas/LanguagesSection'
+          certifications:            '#/components/schemas/CertificationsSection'
+          projects:                  '#/components/schemas/ProjectsSection'
+          references:                '#/components/schemas/ReferencesSection'
+          extraCurricularActivities: '#/components/schemas/ExtraCurricularActivitiesSection'
+          custom:                    '#/components/schemas/CustomSection'
+
+    EmploymentSection:
+      type: object
+      required: [type, items]
+      properties:
+        type:  { type: string, enum: [employment] }
+        title: { type: string, description: Optional title override; falls back to localized default. }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/EmploymentItem' }
+
+    EmploymentItem:
+      type: object
+      required: [company, position]
+      properties:
+        company:     { type: string }
+        position:    { type: string }
+        startDate:   { $ref: '#/components/schemas/MonthDate' }
+        endDate:     { $ref: '#/components/schemas/MonthDate', nullable: true }
+        current:     { type: boolean, default: false }
+        city:        { type: string }
+        description: { type: string }
+
+    EducationSection:
+      type: object
+      required: [type, items]
+      properties:
+        type:  { type: string, enum: [education] }
+        title: { type: string }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/EducationItem' }
+
+    EducationItem:
+      type: object
+      required: [institution]
+      properties:
+        institution: { type: string }
+        degree:      { type: string }
+        major:       { type: string }
+        startDate:   { $ref: '#/components/schemas/MonthDate' }
+        endDate:     { $ref: '#/components/schemas/MonthDate', nullable: true }
+        current:     { type: boolean, default: false }
+        city:        { type: string }
+        description: { type: string }
+
+    SkillsSection:
+      type: object
+      required: [type, items]
+      properties:
+        type:  { type: string, enum: [skills] }
+        title: { type: string }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/SkillItem' }
+
+    SkillItem:
+      type: object
+      required: [skill]
+      properties:
+        skill: { type: string }
+
+    LanguagesSection:
+      type: object
+      required: [type, items]
+      properties:
+        type:  { type: string, enum: [languages] }
+        title: { type: string }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/LanguageItem' }
+
+    LanguageItem:
+      type: object
+      required: [language]
+      properties:
+        language: { type: string }
+        level:    { type: string, description: Free text level e.g. Native, C1, B2, Conversational. }
+
+    CertificationsSection:
+      type: object
+      required: [type, items]
+      properties:
+        type:  { type: string, enum: [certifications] }
+        title: { type: string }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/CertificationItem' }
+
+    CertificationItem:
+      type: object
+      required: [certification]
+      properties:
+        certification: { type: string }
+        institution:   { type: string }
+        startDate:     { $ref: '#/components/schemas/MonthDate' }
+        endDate:       { $ref: '#/components/schemas/MonthDate', nullable: true }
+        description:   { type: string }
+
+    ProjectsSection:
+      type: object
+      required: [type, items]
+      properties:
+        type:  { type: string, enum: [projects] }
+        title: { type: string }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/ProjectItem' }
+
+    ProjectItem:
+      type: object
+      required: [title]
+      properties:
+        title:       { type: string }
+        description: { type: string }
+        startDate:   { $ref: '#/components/schemas/MonthDate' }
+        endDate:     { $ref: '#/components/schemas/MonthDate', nullable: true }
+        current:     { type: boolean, default: false }
+
+    ReferencesSection:
+      type: object
+      required: [type, items]
+      properties:
+        type:  { type: string, enum: [references] }
+        title: { type: string }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/ReferenceItem' }
+
+    ReferenceItem:
+      type: object
+      required: [name]
+      properties:
+        name:     { type: string }
+        position: { type: string }
+        company:  { type: string }
+        email:    { type: string, format: email }
+        phone:    { type: string }
+
+    ExtraCurricularActivitiesSection:
+      type: object
+      required: [type, items]
+      properties:
+        type:  { type: string, enum: [extraCurricularActivities] }
+        title: { type: string }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/ActivityItem' }
+
+    ActivityItem:
+      type: object
+      required: [activity]
+      properties:
+        activity:    { type: string }
+        startDate:   { $ref: '#/components/schemas/MonthDate' }
+        endDate:     { $ref: '#/components/schemas/MonthDate', nullable: true }
+        current:     { type: boolean, default: false }
+        description: { type: string }
+
+    CustomSection:
+      type: object
+      required: [type, id, title, items]
+      properties:
+        type:
+          type: string
+          enum: [custom]
+        id:
+          type: string
+          pattern: '^[a-z][a-z0-9-]{0,49}$'
+          description: Stable developer-supplied slug, used as customSectionId in storage.
+        title:
+          type: string
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              fields:
+                type: object
+                additionalProperties:
+                  oneOf:
+                    - { type: string }
+                    - { type: number }
+                    - { type: boolean }
+
+    MonthDate:
+      type: string
+      pattern: '^\d{4}-(0[1-9]|1[0-2])$'
+      example: '2024-03'
+      description: Month precision (YYYY-MM). Use null endDate + current=true for ongoing entries.
+
+    Styling:
+      type: object
+      properties:
+        color:
+          type: string
+          example: '#0F6B4F'
+        font:
+          type: string
+          example: Grift
+        fontSize:
+          type: integer
+          minimum: 8
+          maximum: 16
