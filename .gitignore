@@ -1,9 +1,9 @@
 node_modules/
 dist/
-*.gen.go
-*.gen.ts
+# TS generated types are emitted at publish time; never commit them.
 ts/src/*.gen.ts
-go/resume/*.gen.go
+# Go generated types ARE committed (Go modules ship source). Regenerate via
+# scripts/generate-go.sh before committing schema changes.
 .DS_Store
 .env
 .env.*
