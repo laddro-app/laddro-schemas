@@ -1,0 +1,105 @@
+openapi: 3.1.0
+info:
+  title: Laddro Cover Letter Schema
+  version: 1.0.0
+  description: |
+    Canonical Cover Letter DTO consumed by laddro-web-app, laddro-backend,
+    laddro-career-api, laddro-ai-core, and laddro-career-document-renderer.
+    Generated types are published to @laddro-app/schemas (npm) and
+    github.com/laddro-app/laddro-schemas/go.
+
+    The cover-letter content is intentionally simpler than the resume — three
+    structural blocks (personalDetails, employerDetails, letterContent). The
+    same Styling type from resume.v1 is reused for visual settings.
+
+components:
+  schemas:
+    CoverLetter:
+      type: object
+      required: [title, locale, content]
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+          example: Cover letter — Senior Product Designer
+        locale:
+          type: string
+          enum: [en, de, es, fr, it, nl, pl, pt, is, fi, sv, no, da, et]
+        templateId:
+          type: string
+          default: emerald
+          description: |
+            Slug from the cover-letter template catalog. Defaults to `emerald`
+            when omitted.
+        content:
+          $ref: '#/components/schemas/CoverLetterContent'
+        styling:
+          $ref: '#/components/schemas/CoverLetterStyling'
+        completeness:
+          type: integer
+          minimum: 0
+          maximum: 100
+          readOnly: true
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+
+    CoverLetterContent:
+      type: object
+      required: [personalDetails, employerDetails, letterContent]
+      properties:
+        personalDetails:
+          $ref: '#/components/schemas/CoverLetterPersonalDetails'
+        employerDetails:
+          $ref: '#/components/schemas/CoverLetterEmployerDetails'
+        letterContent:
+          type: string
+          description: |
+            Body of the letter. HTML allowed (paragraphs and lists).
+
+    CoverLetterPersonalDetails:
+      type: object
+      required: [fullName]
+      properties:
+        fullName: { type: string }
+        jobTitle: { type: string }
+        address:  { type: string }
+        email:    { type: string, format: email }
+        phone:    { type: string }
+
+    CoverLetterEmployerDetails:
+      type: object
+      properties:
+        companyName:       { type: string }
+        hiringManagerName: { type: string }
+
+    CoverLetterStyling:
+      type: object
+      description: |
+        Cover letter visual settings. All fields optional — template defaults
+        apply when omitted.
+      properties:
+        color:
+          type: string
+          example: '#0F6B4F'
+        font:
+          type: string
+          example: Grift
+        fontSize:
+          type: integer
+          minimum: 8
+          maximum: 16
+        margin:
+          type: number
+        lineHeight:
+          type: number

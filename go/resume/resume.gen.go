@@ -219,10 +219,36 @@ func (e SkillsSectionType) Valid() bool {
 	}
 }
 
+// Defines values for StylingPageNumbering.
+const (
+	Fraction StylingPageNumbering = "fraction"
+	None     StylingPageNumbering = "none"
+	Page     StylingPageNumbering = "page"
+	Simple   StylingPageNumbering = "simple"
+)
+
+// Valid indicates whether the value is a known member of the StylingPageNumbering enum.
+func (e StylingPageNumbering) Valid() bool {
+	switch e {
+	case Fraction:
+		return true
+	case None:
+		return true
+	case Page:
+		return true
+	case Simple:
+		return true
+	default:
+		return false
+	}
+}
+
 // ActivityItem defines model for ActivityItem.
 type ActivityItem struct {
-	Activity    string  `json:"activity"`
-	Current     *bool   `json:"current,omitempty"`
+	Activity string `json:"activity"`
+	Current  *bool  `json:"current,omitempty"`
+
+	// Description HTML allowed.
 	Description *string `json:"description,omitempty"`
 
 	// EndDate Month precision (YYYY-MM). Use null endDate + current=true for ongoing entries.
@@ -234,8 +260,10 @@ type ActivityItem struct {
 
 // CertificationItem defines model for CertificationItem.
 type CertificationItem struct {
-	Certification string  `json:"certification"`
-	Description   *string `json:"description,omitempty"`
+	Certification string `json:"certification"`
+
+	// Description HTML allowed.
+	Description *string `json:"description,omitempty"`
 
 	// EndDate Month precision (YYYY-MM). Use null endDate + current=true for ongoing entries.
 	EndDate     *MonthDate `json:"endDate,omitempty"`
@@ -285,9 +313,11 @@ type CustomSectionType string
 
 // EducationItem defines model for EducationItem.
 type EducationItem struct {
-	City        *string `json:"city,omitempty"`
-	Current     *bool   `json:"current,omitempty"`
-	Degree      *string `json:"degree,omitempty"`
+	City    *string `json:"city,omitempty"`
+	Current *bool   `json:"current,omitempty"`
+	Degree  *string `json:"degree,omitempty"`
+
+	// Description HTML allowed.
 	Description *string `json:"description,omitempty"`
 
 	// EndDate Month precision (YYYY-MM). Use null endDate + current=true for ongoing entries.
@@ -311,9 +341,11 @@ type EducationSectionType string
 
 // EmploymentItem defines model for EmploymentItem.
 type EmploymentItem struct {
-	City        *string `json:"city,omitempty"`
-	Company     string  `json:"company"`
-	Current     *bool   `json:"current,omitempty"`
+	City    *string `json:"city,omitempty"`
+	Company string  `json:"company"`
+	Current *bool   `json:"current,omitempty"`
+
+	// Description HTML allowed (paragraphs and lists).
 	Description *string `json:"description,omitempty"`
 
 	// EndDate Month precision (YYYY-MM). Use null endDate + current=true for ongoing entries.
@@ -382,7 +414,9 @@ type PersonalSection struct {
 
 // ProjectItem defines model for ProjectItem.
 type ProjectItem struct {
-	Current     *bool   `json:"current,omitempty"`
+	Current *bool `json:"current,omitempty"`
+
+	// Description HTML allowed.
 	Description *string `json:"description,omitempty"`
 
 	// EndDate Month precision (YYYY-MM). Use null endDate + current=true for ongoing entries.
@@ -391,6 +425,9 @@ type ProjectItem struct {
 	// StartDate Month precision (YYYY-MM). Use null endDate + current=true for ongoing entries.
 	StartDate *MonthDate `json:"startDate,omitempty"`
 	Title     string     `json:"title"`
+
+	// Url Optional link to deployed project or repository.
+	Url *string `json:"url,omitempty"`
 }
 
 // ProjectsSection defines model for ProjectsSection.
@@ -441,8 +478,12 @@ type Resume struct {
 	// per-section `order` field. `personal` and `summary` are top-level
 	// and not part of this array.
 	Sections *[]ReorderableSection `json:"sections,omitempty"`
-	Styling  *Styling              `json:"styling,omitempty"`
-	Summary  SummarySection        `json:"summary"`
+
+	// Styling Resume visual settings. All fields optional — the template's default
+	// applies when omitted. Backend persists this as part of the encrypted
+	// resume content.
+	Styling *Styling       `json:"styling,omitempty"`
+	Summary SummarySection `json:"summary"`
 
 	// TemplateId Slug from the template catalog. Defaults to `emerald` when
 	// omitted. The read path always returns a resolved templateId.
@@ -459,7 +500,10 @@ type ResumeLocale string
 
 // SkillItem defines model for SkillItem.
 type SkillItem struct {
-	Skill string `json:"skill"`
+	// Level Free-text proficiency e.g. Expert, Advanced, Intermediate, Beginner,
+	// or a custom value. Optional — templates render gracefully when omitted.
+	Level *string `json:"level,omitempty"`
+	Skill string  `json:"skill"`
 }
 
 // SkillsSection defines model for SkillsSection.
@@ -472,16 +516,48 @@ type SkillsSection struct {
 // SkillsSectionType defines model for SkillsSection.Type.
 type SkillsSectionType string
 
-// Styling defines model for Styling.
+// Styling Resume visual settings. All fields optional — the template's default
+// applies when omitted. Backend persists this as part of the encrypted
+// resume content.
 type Styling struct {
-	Color    *string `json:"color,omitempty"`
-	Font     *string `json:"font,omitempty"`
-	FontSize *int    `json:"fontSize,omitempty"`
+	// Color Hex color override. Falls back to the template's default palette.
+	Color *string `json:"color,omitempty"`
+
+	// Font Font family override. Falls back to the template's default.
+	Font *string `json:"font,omitempty"`
+
+	// FontSize Body font size in points.
+	FontSize *int `json:"fontSize,omitempty"`
+
+	// LineHeight Body line-height multiplier (e.g. 1.2, 1.4).
+	LineHeight *float32 `json:"lineHeight,omitempty"`
+
+	// Margin Page margin in points.
+	Margin *float32 `json:"margin,omitempty"`
+
+	// PageNumbering Pagination style. `none` hides numbers; `simple` shows "1"; `fraction`
+	// shows "1/3"; `page` shows "Page 1".
+	PageNumbering *StylingPageNumbering `json:"pageNumbering,omitempty"`
+
+	// Photo Profile photo URL. Templates that support photos render it; others ignore.
+	Photo *string `json:"photo,omitempty"`
+
+	// PhotoSize Photo size in points (square).
+	PhotoSize *float32 `json:"photoSize,omitempty"`
+
+	// ShowProfileImage Explicit on/off for the photo. When omitted, falls back to the
+	// template's default (templates declare supportsProfileImage).
+	ShowProfileImage *bool `json:"showProfileImage,omitempty"`
 }
+
+// StylingPageNumbering Pagination style. `none` hides numbers; `simple` shows "1"; `fraction`
+// shows "1/3"; `page` shows "Page 1".
+type StylingPageNumbering string
 
 // SummarySection defines model for SummarySection.
 type SummarySection struct {
-	// Value Plain text professional summary.
+	// Value Professional summary. HTML allowed (e.g. <p>, <strong>, <em>, <ul>, <li>).
+	// Renderer parses inline tags.
 	Value *string `json:"value,omitempty"`
 }
 

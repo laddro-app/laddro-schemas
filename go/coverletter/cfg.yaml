@@ -1,0 +1,7 @@
+package: coverletter
+output: cover-letter.gen.go
+generate:
+  models: true
+  embedded-spec: false
+output-options:
+  skip-prune: true

@@ -1,16 +1,24 @@
 #!/usr/bin/env bash
-# Regenerate TypeScript types from resume.v1.yaml into ts/src/resume.gen.ts.
+# Regenerate TypeScript types from all *.v1.yaml specs into ts/src/*.gen.ts.
 # Run from repo root: bash scripts/generate-ts.sh
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
 OUT_DIR=ts/src
-OUT_FILE="${OUT_DIR}/resume.gen.ts"
-
 mkdir -p "${OUT_DIR}"
 
-echo "Generating ${OUT_FILE} from resume/resume.v1.yaml..."
-npx --yes openapi-typescript@latest resume/resume.v1.yaml -o "${OUT_FILE}"
+declare -a SPECS=(
+  "resume/resume.v1.yaml:resume.gen.ts"
+  "cover-letter/cover-letter.v1.yaml:cover-letter.gen.ts"
+)
+
+for entry in "${SPECS[@]}"; do
+  spec="${entry%%:*}"
+  out="${entry##*:}"
+  out_file="${OUT_DIR}/${out}"
+  echo "Generating ${out_file} from ${spec}..."
+  npx --yes openapi-typescript@latest "${spec}" -o "${out_file}"
+done
 
 echo "Done."

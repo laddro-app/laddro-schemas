@@ -1,17 +1,22 @@
 openapi: 3.1.0
 info:
   title: Laddro Resume Schema
-  version: 1.0.0
+  version: 1.1.0
   description: |
-    Canonical Resume DTO consumed by laddro-web-app, laddro-backend, and
-    laddro-career-api. Generated types are published to @laddro-app/schemas
-    (npm) and github.com/laddro-app/laddro-schemas/go.
+    Canonical Resume DTO consumed by laddro-web-app, laddro-backend,
+    laddro-career-api, laddro-ai-core, and laddro-career-document-renderer.
+    Generated types are published to @laddro-app/schemas (npm) and
+    github.com/laddro-app/laddro-schemas/go.
 
     Ordering rule: array position determines display order at every level.
     `personal` and `summary` are structural top-level fields and always render
     first, in that order. `sections[]` is the reorderable list — array index
     is the section's display position. Items inside each section also use
     array order.
+
+    1.1.0 (2026-06-04): Added Skill.level, Project.url, richer Styling
+    (photo, photoSize, margin, lineHeight, showProfileImage, pageNumbering).
+    Clarified that summary and item.description fields may contain HTML.
 
 components:
   schemas:
@@ -91,7 +96,9 @@ components:
       properties:
         value:
           type: string
-          description: Plain text professional summary.
+          description: |
+            Professional summary. HTML allowed (e.g. <p>, <strong>, <em>, <ul>, <li>).
+            Renderer parses inline tags.
 
     ReorderableSection:
       oneOf:
@@ -137,7 +144,7 @@ components:
         endDate:     { $ref: '#/components/schemas/MonthDate', nullable: true }
         current:     { type: boolean, default: false }
         city:        { type: string }
-        description: { type: string }
+        description: { type: string, description: HTML allowed (paragraphs and lists). }
 
     EducationSection:
       type: object
@@ -160,7 +167,7 @@ components:
         endDate:     { $ref: '#/components/schemas/MonthDate', nullable: true }
         current:     { type: boolean, default: false }
         city:        { type: string }
-        description: { type: string }
+        description: { type: string, description: HTML allowed. }
 
     SkillsSection:
       type: object
@@ -177,6 +184,11 @@ components:
       required: [skill]
       properties:
         skill: { type: string }
+        level:
+          type: string
+          description: |
+            Free-text proficiency e.g. Expert, Advanced, Intermediate, Beginner,
+            or a custom value. Optional — templates render gracefully when omitted.
 
     LanguagesSection:
       type: object
@@ -213,7 +225,7 @@ components:
         institution:   { type: string }
         startDate:     { $ref: '#/components/schemas/MonthDate' }
         endDate:       { $ref: '#/components/schemas/MonthDate', nullable: true }
-        description:   { type: string }
+        description:   { type: string, description: HTML allowed. }
 
     ProjectsSection:
       type: object
@@ -230,7 +242,8 @@ components:
       required: [title]
       properties:
         title:       { type: string }
-        description: { type: string }
+        description: { type: string, description: HTML allowed. }
+        url:         { type: string, format: uri, description: Optional link to deployed project or repository. }
         startDate:   { $ref: '#/components/schemas/MonthDate' }
         endDate:     { $ref: '#/components/schemas/MonthDate', nullable: true }
         current:     { type: boolean, default: false }
@@ -273,7 +286,7 @@ components:
         startDate:   { $ref: '#/components/schemas/MonthDate' }
         endDate:     { $ref: '#/components/schemas/MonthDate', nullable: true }
         current:     { type: boolean, default: false }
-        description: { type: string }
+        description: { type: string, description: HTML allowed. }
 
     CustomSection:
       type: object
@@ -309,14 +322,45 @@ components:
 
     Styling:
       type: object
+      description: |
+        Resume visual settings. All fields optional — the template's default
+        applies when omitted. Backend persists this as part of the encrypted
+        resume content.
       properties:
         color:
           type: string
+          description: Hex color override. Falls back to the template's default palette.
           example: '#0F6B4F'
         font:
           type: string
+          description: Font family override. Falls back to the template's default.
           example: Grift
         fontSize:
           type: integer
+          description: Body font size in points.
           minimum: 8
           maximum: 16
+        margin:
+          type: number
+          description: Page margin in points.
+        lineHeight:
+          type: number
+          description: Body line-height multiplier (e.g. 1.2, 1.4).
+        photo:
+          type: string
+          format: uri
+          description: Profile photo URL. Templates that support photos render it; others ignore.
+        photoSize:
+          type: number
+          description: Photo size in points (square).
+        showProfileImage:
+          type: boolean
+          description: |
+            Explicit on/off for the photo. When omitted, falls back to the
+            template's default (templates declare supportsProfileImage).
+        pageNumbering:
+          type: string
+          enum: [none, simple, fraction, page]
+          description: |
+            Pagination style. `none` hides numbers; `simple` shows "1"; `fraction`
+            shows "1/3"; `page` shows "Page 1".

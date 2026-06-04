@@ -1,7 +1,7 @@
 {
   "name": "@laddro-app/schemas",
-  "version": "0.1.0",
-  "description": "Shared OpenAPI 3.1 schemas for Laddro APIs (resume, cover letter, template).",
+  "version": "0.2.0",
+  "description": "Shared OpenAPI 3.1 schemas for Laddro APIs (resume, cover letter).",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
@@ -14,6 +14,10 @@
     "./resume": {
       "types": "./dist/resume.gen.d.ts",
       "default": "./dist/resume.gen.js"
+    },
+    "./cover-letter": {
+      "types": "./dist/cover-letter.gen.d.ts",
+      "default": "./dist/cover-letter.gen.js"
     }
   },
   "files": [
