@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Laddro Resume Schema
-  version: 1.1.0
+  version: 1.2.0
   description: |
     Canonical Resume DTO consumed by laddro-web-app, laddro-backend,
     laddro-career-api, laddro-ai-core, and laddro-career-document-renderer.
@@ -13,6 +13,12 @@ info:
     first, in that order. `sections[]` is the reorderable list — array index
     is the section's display position. Items inside each section also use
     array order.
+
+    1.2.0 (2026-06-06): Added PersonalSection.links — optional array (max 5)
+    of user-supplied label+url pairs. Renders as a separate visual cluster
+    attached to the contact area (second-line strip on single-column
+    templates; sidebar block on sidebar templates). Additive, non-breaking;
+    the fixed website/linkedin contact slots are unchanged.
 
     1.1.0 (2026-06-04): Added Skill.level, Project.url, richer Styling
     (photo, photoSize, margin, lineHeight, showProfileImage, pageNumbering).
@@ -90,6 +96,20 @@ components:
         country:   { type: string }
         website:   { type: string, format: uri }
         linkedin:  { type: string, format: uri }
+        links:
+          type: array
+          maxItems: 5
+          description: |
+            Optional user-supplied label+url pairs. Render as a separate cluster attached
+            to the contact area (single-column templates: second-line strip below contact
+            dots; sidebar templates: vertical block below the contact block). The fixed
+            website/linkedin fields above keep their own slots in the contact dots row.
+          items:
+            type: object
+            required: [label, url]
+            properties:
+              label: { type: string, minLength: 1, maxLength: 50 }
+              url:   { type: string, format: uri }
 
     SummarySection:
       type: object
