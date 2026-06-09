@@ -47,7 +47,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Validate fixture JSON
+      - name: Validate fixture JSON (resume + tailor)
         run: |
-          find resume/fixtures -name '*.json' -print0 |
+          find resume/fixtures tailor/fixtures -name '*.json' -print0 |
             xargs -0 -I {} sh -c 'echo "Validating {}" && python3 -m json.tool {} >/dev/null'
+
+  tailor-fixtures-invariants:
+    runs-on: ubuntu-latest
+    needs: []
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - name: Check input/expected pairing + source_quote substring invariants
+        run: python3 scripts/validate-tailor-fixtures.py

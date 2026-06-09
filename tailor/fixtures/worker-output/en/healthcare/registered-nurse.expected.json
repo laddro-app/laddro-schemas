@@ -1,0 +1,154 @@
+{
+  "raw_text": "Registered Nurse — Acute Medical Unit\nSt. Margaret's Community Hospital\nGalway, Ireland — 39 hrs/week, rotating shifts\n\nWe are recruiting Registered Nurses to join the Acute Medical Unit at St. Margaret's. The unit cares for adults presenting with acute medical conditions — sepsis, COPD exacerbations, cardiac events, decompensated diabetes — and supports an average length of stay of 4 days.\n\nThe role\nReporting to the Clinical Nurse Manager, you will deliver direct patient care during 12-hour shifts on a 3-on/4-off rota. You will be one of six nurses on the floor at any time and will be paired with a healthcare assistant for each shift.\n\nResponsibilities\n• Monitor patients' vital signs and recognise early signs of deterioration\n• Administer prescribed medication, including IV antibiotics, anticoagulants and analgesics\n• Document all care in the electronic health record before end-of-shift handover\n• Perform wound assessment and dressing changes for surgical and pressure-related wounds\n• Triage admissions arriving from the Emergency Department\n• Communicate with the multidisciplinary team — consultants, physiotherapists, social workers — on care plans\n• Maintain strict infection prevention and control standards on the ward\n\nEssential\n• Registration with the Nursing and Midwifery Board of Ireland (NMBI)\n• At least 1 year of post-registration experience in an acute setting\n• Current BLS certification\n• Evidence of recent CPD activity\n\nDesirable\n• Mentorship of student nurses or new graduates\n• Experience with the EpicCare electronic health record\n\nWe expect candidates to demonstrate empathy with vulnerable adults, calm decision-making under pressure, and the ability to communicate clearly with patients and families at distressing moments.",
+  "locale": "en",
+  "title": "Registered Nurse",
+  "company": "St. Margaret's Community Hospital",
+  "seniority": {
+    "level": "mid",
+    "years_min": 1,
+    "years_max": 0,
+    "confidence": 0.75
+  },
+  "skills": [
+    {
+      "label": "monitor patient's vital signs",
+      "normalized": "monitor patient's vital signs",
+      "esco_id": "http://data.europa.eu/esco/skill/60f826be-0c1b-413b-aad5-4f7546622e16",
+      "required": true,
+      "confidence": 0.95,
+      "source_quote": "Monitor patients' vital signs and recognise early signs of deterioration"
+    },
+    {
+      "label": "administer prescribed medication",
+      "normalized": "administer prescribed medication",
+      "esco_id": "http://data.europa.eu/esco/skill/1fd57242-267e-46df-bd8c-849fdd593a50",
+      "required": true,
+      "confidence": 0.95,
+      "source_quote": "Administer prescribed medication, including IV antibiotics, anticoagulants and analgesics"
+    },
+    {
+      "label": "use electronic health records in nursing",
+      "normalized": "electronic health records",
+      "esco_id": "http://data.europa.eu/esco/skill/a46743b7-ff8c-49b6-99f7-7fa5bc241771",
+      "required": true,
+      "confidence": 0.90,
+      "source_quote": "Document all care in the electronic health record before end-of-shift handover"
+    },
+    {
+      "label": "carry out wound care",
+      "normalized": "wound care",
+      "esco_id": "http://data.europa.eu/esco/skill/1c6736c2-77de-419c-9b84-8932e15abc21",
+      "required": true,
+      "confidence": 0.90,
+      "source_quote": "Perform wound assessment and dressing changes for surgical and pressure-related wounds"
+    },
+    {
+      "label": "triage clients",
+      "normalized": "triage",
+      "esco_id": "http://data.europa.eu/esco/skill/e704d860-6f06-401e-abb3-a7fb959c046f",
+      "required": true,
+      "confidence": 0.85,
+      "source_quote": "Triage admissions arriving from the Emergency Department"
+    },
+    {
+      "label": "infection control",
+      "normalized": "infection control",
+      "esco_id": "http://data.europa.eu/esco/skill/6d13053b-ee35-492c-8976-8178420df398",
+      "required": true,
+      "confidence": 0.95,
+      "source_quote": "Maintain strict infection prevention and control standards on the ward"
+    },
+    {
+      "label": "BLS",
+      "normalized": "bls",
+      "esco_id": "",
+      "required": true,
+      "confidence": 0.90,
+      "source_quote": "Current BLS certification"
+    },
+    {
+      "label": "mentor individuals",
+      "normalized": "mentor individuals",
+      "esco_id": "http://data.europa.eu/esco/skill/a584a638-a2c0-4b3c-bdf3-a64f87225be9",
+      "required": false,
+      "confidence": 0.85,
+      "source_quote": "Mentorship of student nurses or new graduates"
+    },
+    {
+      "label": "EpicCare electronic health record",
+      "normalized": "epiccare ehr",
+      "esco_id": "",
+      "required": false,
+      "confidence": 0.85,
+      "source_quote": "Experience with the EpicCare electronic health record"
+    }
+  ],
+  "requirements": [
+    {
+      "text": "Monitor patients' vital signs and recognise early signs of deterioration",
+      "category": "responsibility",
+      "confidence": 0.95,
+      "source_quote": "Monitor patients' vital signs and recognise early signs of deterioration"
+    },
+    {
+      "text": "Administer prescribed medication, including IV antibiotics, anticoagulants and analgesics",
+      "category": "responsibility",
+      "confidence": 0.95,
+      "source_quote": "Administer prescribed medication, including IV antibiotics, anticoagulants and analgesics"
+    },
+    {
+      "text": "Document all care in the electronic health record before end-of-shift handover",
+      "category": "responsibility",
+      "confidence": 0.90,
+      "source_quote": "Document all care in the electronic health record before end-of-shift handover"
+    },
+    {
+      "text": "Communicate with the multidisciplinary team — consultants, physiotherapists, social workers — on care plans",
+      "category": "responsibility",
+      "confidence": 0.90,
+      "source_quote": "Communicate with the multidisciplinary team — consultants, physiotherapists, social workers — on care plans"
+    },
+    {
+      "text": "Registration with the Nursing and Midwifery Board of Ireland (NMBI)",
+      "category": "qualification",
+      "confidence": 0.95,
+      "source_quote": "Registration with the Nursing and Midwifery Board of Ireland (NMBI)"
+    },
+    {
+      "text": "Current BLS certification",
+      "category": "qualification",
+      "confidence": 0.90,
+      "source_quote": "Current BLS certification"
+    },
+    {
+      "text": "Evidence of recent CPD activity",
+      "category": "qualification",
+      "confidence": 0.85,
+      "source_quote": "Evidence of recent CPD activity"
+    },
+    {
+      "text": "At least 1 year of post-registration experience in an acute setting",
+      "category": "experience",
+      "confidence": 0.90,
+      "source_quote": "At least 1 year of post-registration experience in an acute setting"
+    },
+    {
+      "text": "Demonstrate empathy with vulnerable adults",
+      "category": "soft",
+      "confidence": 0.85,
+      "source_quote": "demonstrate empathy with vulnerable adults"
+    },
+    {
+      "text": "Calm decision-making under pressure",
+      "category": "soft",
+      "confidence": 0.85,
+      "source_quote": "calm decision-making under pressure"
+    },
+    {
+      "text": "Communicate clearly with patients and families at distressing moments",
+      "category": "soft",
+      "confidence": 0.85,
+      "source_quote": "the ability to communicate clearly with patients and families at distressing moments"
+    }
+  ]
+}
