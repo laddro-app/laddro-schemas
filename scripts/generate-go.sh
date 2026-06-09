@@ -8,6 +8,7 @@ REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 declare -a SPECS=(
   "resume/resume.v1.yaml:go/resume"
   "cover-letter/cover-letter.v1.yaml:go/coverletter"
+  "tailor/tailor.v1.yaml:go/tailor"
 )
 
 for entry in "${SPECS[@]}"; do
