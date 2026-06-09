@@ -1,0 +1,140 @@
+{
+  "raw_text": "Senior Backend Engineer\nAurora Labs — Berlin (hybrid)\n\nAurora Labs builds the data plane that powers fraud detection for European fintechs. We're hiring a Senior Backend Engineer to own the ingestion pipeline that processes 4B events per day and to coach two mid-level engineers as the team grows.\n\nWhat you'll do\n• Design and ship services in Go that move events from Kafka into ClickHouse with sub-second tail latency\n• Run incident response on a weekly on-call rotation with two other engineers\n• Review code from teammates daily and raise the team's bar for testing and observability\n• Partner with the data science team on the schema of new event types and the back-pressure model\n\nWhat we're looking for\n• 5+ years building production backend services, ideally in Go, Python, or a similar systems language\n• Deep familiarity with PostgreSQL or another relational database at scale (sharding, replication, query tuning)\n• Hands-on experience operating services on Kubernetes in a public cloud (AWS, GCP, or Azure)\n• Comfort with distributed systems trade-offs: CAP, idempotency, exactly-once semantics\n• Track record of mentoring less senior engineers\n\nNice to have\n• Experience with stream processing (Kafka Streams, Flink, or similar)\n• Background in fraud, AML, or another high-stakes domain\n• Familiarity with Docker-based local development\n\nWe offer a remote-first culture, a real on-call comp budget, and 30 days of paid leave.",
+  "locale": "en",
+  "title": "Senior Backend Engineer",
+  "company": "Aurora Labs",
+  "seniority": {
+    "level": "senior",
+    "years_min": 5,
+    "years_max": 0,
+    "confidence": 0.95
+  },
+  "skills": [
+    {
+      "label": "Go",
+      "normalized": "go",
+      "esco_id": "",
+      "required": true,
+      "confidence": 0.90,
+      "source_quote": "Design and ship services in Go that move events from Kafka into ClickHouse with sub-second tail latency"
+    },
+    {
+      "label": "Python",
+      "normalized": "python",
+      "esco_id": "http://data.europa.eu/esco/skill/ccd0a1d9-afda-43d9-b901-96344886e14d",
+      "required": true,
+      "confidence": 0.85,
+      "source_quote": "5+ years building production backend services, ideally in Go, Python, or a similar systems language"
+    },
+    {
+      "label": "PostgreSQL",
+      "normalized": "postgresql",
+      "esco_id": "http://data.europa.eu/esco/skill/a8d07b5a-c1a1-42c6-9d53-db9c7a2ca996",
+      "required": true,
+      "confidence": 0.95,
+      "source_quote": "Deep familiarity with PostgreSQL or another relational database at scale (sharding, replication, query tuning)"
+    },
+    {
+      "label": "Kubernetes",
+      "normalized": "kubernetes",
+      "esco_id": "",
+      "required": true,
+      "confidence": 0.95,
+      "source_quote": "Hands-on experience operating services on Kubernetes in a public cloud (AWS, GCP, or Azure)"
+    },
+    {
+      "label": "cloud technologies",
+      "normalized": "cloud technologies",
+      "esco_id": "http://data.europa.eu/esco/skill/bd14968e-e409-45af-b362-3495ed7b10e0",
+      "required": true,
+      "confidence": 0.85,
+      "source_quote": "Hands-on experience operating services on Kubernetes in a public cloud (AWS, GCP, or Azure)"
+    },
+    {
+      "label": "distributed computing",
+      "normalized": "distributed computing",
+      "esco_id": "http://data.europa.eu/esco/skill/897b393f-e7e0-4248-a40d-d77119694e83",
+      "required": true,
+      "confidence": 0.90,
+      "source_quote": "Comfort with distributed systems trade-offs: CAP, idempotency, exactly-once semantics"
+    },
+    {
+      "label": "Kafka",
+      "normalized": "kafka",
+      "esco_id": "",
+      "required": true,
+      "confidence": 0.85,
+      "source_quote": "Design and ship services in Go that move events from Kafka into ClickHouse with sub-second tail latency"
+    },
+    {
+      "label": "ICT code review",
+      "normalized": "ict code review",
+      "esco_id": "http://data.europa.eu/esco/skill/9d1b08b3-ba1e-41f6-a466-1ac1e62eb5f0",
+      "required": true,
+      "confidence": 0.85,
+      "source_quote": "Review code from teammates daily and raise the team's bar for testing and observability"
+    },
+    {
+      "label": "mentor individuals",
+      "normalized": "mentor individuals",
+      "esco_id": "http://data.europa.eu/esco/skill/a584a638-a2c0-4b3c-bdf3-a64f87225be9",
+      "required": true,
+      "confidence": 0.90,
+      "source_quote": "Track record of mentoring less senior engineers"
+    },
+    {
+      "label": "stream processing",
+      "normalized": "stream processing",
+      "esco_id": "",
+      "required": false,
+      "confidence": 0.90,
+      "source_quote": "Experience with stream processing (Kafka Streams, Flink, or similar)"
+    },
+    {
+      "label": "Docker",
+      "normalized": "docker",
+      "esco_id": "",
+      "required": false,
+      "confidence": 0.85,
+      "source_quote": "Familiarity with Docker-based local development"
+    }
+  ],
+  "requirements": [
+    {
+      "text": "Design and ship services in Go that move events from Kafka into ClickHouse with sub-second tail latency",
+      "category": "responsibility",
+      "confidence": 0.90,
+      "source_quote": "Design and ship services in Go that move events from Kafka into ClickHouse with sub-second tail latency"
+    },
+    {
+      "text": "Run incident response on a weekly on-call rotation with two other engineers",
+      "category": "responsibility",
+      "confidence": 0.90,
+      "source_quote": "Run incident response on a weekly on-call rotation with two other engineers"
+    },
+    {
+      "text": "Review code from teammates daily and raise the team's bar for testing and observability",
+      "category": "responsibility",
+      "confidence": 0.85,
+      "source_quote": "Review code from teammates daily and raise the team's bar for testing and observability"
+    },
+    {
+      "text": "Partner with the data science team on the schema of new event types and the back-pressure model",
+      "category": "responsibility",
+      "confidence": 0.85,
+      "source_quote": "Partner with the data science team on the schema of new event types and the back-pressure model"
+    },
+    {
+      "text": "5+ years building production backend services",
+      "category": "experience",
+      "confidence": 0.95,
+      "source_quote": "5+ years building production backend services, ideally in Go, Python, or a similar systems language"
+    },
+    {
+      "text": "Background in fraud, AML, or another high-stakes domain",
+      "category": "experience",
+      "confidence": 0.85,
+      "source_quote": "Background in fraud, AML, or another high-stakes domain"
+    }
+  ]
+}
