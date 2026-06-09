@@ -37,6 +37,11 @@ info:
 
     1.0.0 (2026-06-09): Initial contract, replaces the regex-based
     extraction in laddro-ai-core/internal/tailor/analysis/jd_parser.go.
+    Suggestions carry a typed `target` (BulletTarget | SummaryTarget |
+    SkillTarget) so the frontend applies accepts deterministically; the
+    response includes a `fit_verdict` so we can refuse to tailor honestly
+    when the resume doesn't match the JD at all (the "honest tailor"
+    promise made explicit at the API).
 
 components:
   schemas:
@@ -190,9 +195,21 @@ components:
       properties:
         resume:
           description: |
-            Full Resume DTO from @laddro-app/schemas/resume. Reffed loosely
-            here because YAML cross-spec refs are awkward — code uses the
-            generated Resume type directly.
+            The full Resume DTO. ai-core consumes it typed and walks every
+            section, item, and description in order to produce Suggestions
+            with valid `target.section_index` / `target.item_index` indices
+            into THIS resume. The frontend must send the resume verbatim
+            (no stripping) so suggestions remain applicable.
+
+            Consumers MUST import the typed Resume from
+            `@laddro-app/schemas/resume`:
+              - TS:  `import type { components } from '@laddro-app/schemas/resume'`
+                     then `components['schemas']['Resume']`
+              - Go:  `github.com/laddro-app/laddro-schemas/go/resume.Resume`
+
+            The field is declared as `type: object` here only because OpenAPI
+            3.1 cross-file `$ref` support is uneven across our codegen tools.
+            Treat it as `Resume` at every call site.
           type: object
         job_description:
           type: string
@@ -204,15 +221,64 @@ components:
 
     TailorResponse:
       type: object
-      required: [parsed_job, compatibility_score, suggestions]
+      required: [parsed_job, compatibility_score, fit_verdict, suggestions]
       properties:
         parsed_job:
           $ref: '#/components/schemas/JobDescription'
         compatibility_score:
           $ref: '#/components/schemas/CompatibilityScore'
+        fit_verdict:
+          type: string
+          enum: [strong_fit, partial_fit, weak_fit, no_fit]
+          description: |
+            Honest verdict on whether this resume can be tailored to this JD
+            at all. Derived from compatibility_score, the recommender's anchor
+            coverage (how many required skills have any resume evidence), and
+            the seniority gap.
+
+            - `strong_fit`   normal stack, most requirements have anchors.
+            - `partial_fit`  normal stack, some gaps the user should know about.
+            - `weak_fit`     stack rendered with a banner: "low fit, consider
+                             a different job — these are what we could find."
+            - `no_fit`       suggestions[] is empty by construction. Frontend
+                             shows "this isn't your job — we don't fake resumes,
+                             we prepare you for the job." Backed by no_fit_reason.
+
+            ai-core owns the decision rule. Frontend branches UX off this enum
+            only — it never re-derives the verdict from the score.
+        no_fit_reason:
+          description: |
+            Present when fit_verdict is `weak_fit` or `no_fit`. Machine-readable
+            primary cause + locale-aware human explanation the frontend can
+            surface verbatim.
+          allOf:
+            - $ref: '#/components/schemas/NoFitReason'
         suggestions:
           type: array
           items: { $ref: '#/components/schemas/Suggestion' }
+
+    NoFitReason:
+      type: object
+      required: [primary, explanation]
+      properties:
+        primary:
+          type: string
+          enum: [skills_gap, seniority_gap, industry_mismatch, insufficient_evidence]
+          description: |
+            - `skills_gap`            JD's required skills aren't present in the resume
+                                      and no anchors support adding them.
+            - `seniority_gap`         Resume's experience level is materially off from
+                                      what the JD asks for (junior → director, or vice
+                                      versa).
+            - `industry_mismatch`     Resume's occupation graph and the JD's occupation
+                                      don't overlap (nurse vs. backend engineer).
+            - `insufficient_evidence` Resume itself is too thin (empty descriptions,
+                                      no experiences) for any meaningful matching.
+        explanation:
+          type: string
+          description: |
+            One- or two-sentence reason in the user's locale, drawn from i18n
+            strings — not free-form LLM output. Frontend shows verbatim.
 
     CompatibilityScore:
       type: object
@@ -256,28 +322,48 @@ components:
 
     Suggestion:
       type: object
-      required: [id, type, original_text, instruction, requirement_ref]
+      required: [id, kind, target, original_text, instruction, requirement_ref]
       properties:
         id:
           type: string
           format: uuid
-        type:
+        kind:
           type: string
-          enum: [rewrite_bullet, add_bullet]
+          enum: [rewrite_bullet, add_bullet, rewrite_summary, add_skill]
           description: |
-            `rewrite_bullet` — there's an existing bullet the user can sharpen
-            to match the requirement. `original_text` is the bullet,
-            `instruction` is what to change.
+            What this suggestion does to the resume. Each kind has a matching
+            `target` shape (see SuggestionTarget) and a per-kind meaning for
+            `original_text`:
 
-            `add_bullet` — the requirement is missing entirely AND we found
-            a resume anchor (existing experience that plausibly supports
-            it). `original_text` is the anchor span the new bullet must
-            stay faithful to; the writer is forbidden from going beyond it.
+            - `rewrite_bullet`   Replace one `<li>` (or `<p>`) inside
+                                 `resume.sections[target.section_index].items[target.item_index].description`.
+                                 `original_text` is the verbatim HTML fragment
+                                 to find and replace.
+            - `add_bullet`       Append a new `<li>` to the same description.
+                                 `original_text` is the resume "anchor" — the
+                                 existing experience text the new bullet must
+                                 stay faithful to. The anchor is NOT in the
+                                 description being mutated; it's evidence from
+                                 elsewhere in the resume.
+            - `rewrite_summary`  Replace `resume.summary.value` entirely.
+                                 `original_text` is the current summary verbatim.
+            - `add_skill`        Append a SkillItem to a SkillsSection.
+                                 `original_text` is the bullet/text from the
+                                 resume that proves the user already has the
+                                 skill. Refused (no suggestion emitted) when
+                                 no anchor exists — the no-fabrication gate.
+
+            Suggestions can be applied in any order. Frontend matches the
+            verbatim `original_text` substring on `rewrite_*` to stay robust
+            against user edits between fetch and accept; if not found, the
+            card goes stale-grayed in the UI.
+        target:
+          $ref: '#/components/schemas/SuggestionTarget'
         original_text:
           type: string
           description: |
-            For rewrite: the bullet text. For add: the anchor span from the
-            resume. Quoted to the user as proof we're not fabricating.
+            Per-kind semantics — see `kind`. Always shown to the user as proof
+            of grounding ("from your resume: ...").
         instruction:
           type: string
           description: |
@@ -292,9 +378,73 @@ components:
         requirement_ref:
           type: string
           description: |
-            ID of the JobDescription.requirement (or skill) this suggestion
+            ID of the JobDescription requirement (or skill) this suggestion
             addresses. Lets the frontend show "this card addresses THIS ask
             from the JD" with the source_quote highlighted.
+
+    SuggestionTarget:
+      description: |
+        Discriminated union pointing at the exact Resume object a Suggestion
+        mutates. `scope` matches the Suggestion.kind's natural target:
+          rewrite_bullet, add_bullet  → BulletTarget   (scope=bullet)
+          rewrite_summary             → SummaryTarget  (scope=summary)
+          add_skill                   → SkillTarget    (scope=skill)
+      oneOf:
+        - $ref: '#/components/schemas/BulletTarget'
+        - $ref: '#/components/schemas/SummaryTarget'
+        - $ref: '#/components/schemas/SkillTarget'
+      discriminator:
+        propertyName: scope
+        mapping:
+          bullet:  '#/components/schemas/BulletTarget'
+          summary: '#/components/schemas/SummaryTarget'
+          skill:   '#/components/schemas/SkillTarget'
+
+    BulletTarget:
+      type: object
+      required: [scope, section_index, item_index]
+      properties:
+        scope:
+          type: string
+          enum: [bullet]
+        section_index:
+          type: integer
+          minimum: 0
+          description: Index into `resume.sections[]`.
+        item_index:
+          type: integer
+          minimum: 0
+          description: |
+            Index into `resume.sections[section_index].items[]`. The pointed-at
+            section MUST be one whose items have a `description` field:
+            employment, education, certifications, projects,
+            extraCurricularActivities. Skills/Languages/References sections
+            are not valid targets for rewrite_bullet/add_bullet.
+
+    SummaryTarget:
+      type: object
+      required: [scope]
+      properties:
+        scope:
+          type: string
+          enum: [summary]
+      description: |
+        Targets `resume.summary.value`. No indices — there's exactly one summary.
+
+    SkillTarget:
+      type: object
+      required: [scope, section_index]
+      properties:
+        scope:
+          type: string
+          enum: [skill]
+        section_index:
+          type: integer
+          minimum: 0
+          description: |
+            Index into `resume.sections[]`. The pointed-at section MUST be a
+            SkillsSection (`type: skills`). For `add_skill`, the new SkillItem
+            is appended to `items[]`.
 
     # ─────────────────────────────────────────────────────────────
     #  Lazy fill endpoint (laddro-ai-core /v1/tailor/fill)
@@ -309,18 +459,47 @@ components:
         evidence:
           type: array
           description: |
-            Resume bullets / facts the writer is allowed to draw from. The
-            writer refuses (422) when none of the evidence supports the
-            instruction — the no-fabrication gate.
+            Resume spans the writer is allowed to draw from. The writer
+            refuses (422) when none of the evidence supports the instruction
+            — the no-fabrication gate. Every span carries a structured
+            EvidenceSource so the writer's grounding is auditable: we can
+            always answer "which bullet did this proposed text come from?"
           items:
-            type: object
-            required: [text, source]
-            properties:
-              text:   { type: string }
-              source: { type: string, description: "e.g. 'experience[0].bullets[2]'" }
+            $ref: '#/components/schemas/Evidence'
         locale:
           type: string
           enum: [en, de, es, fr, it, nl, pl, pt, is, fi, sv, no, da, et]
+
+    Evidence:
+      type: object
+      required: [text, source]
+      properties:
+        text:
+          type: string
+          description: The evidence text verbatim from the resume.
+        source:
+          $ref: '#/components/schemas/EvidenceSource'
+
+    EvidenceSource:
+      type: object
+      required: [section_index, item_index]
+      properties:
+        section_index:
+          type: integer
+          minimum: 0
+          description: Index into `resume.sections[]` this evidence came from.
+        item_index:
+          type: integer
+          minimum: 0
+          description: Index into that section's `items[]`.
+        fragment_anchor:
+          type: string
+          description: |
+            Verbatim HTML fragment within the item's description (or skill
+            label / etc) that this evidence quotes. Empty when the evidence
+            is the whole item (e.g. a SkillItem or LanguageItem). Used by
+            auditing and by the writer to know exactly which span to ground
+            against — NEVER for regex or substring rewriting in the writer.
 
     FillResponse:
       type: object

@@ -4,8 +4,27 @@
 package tailor
 
 import (
+	"encoding/json"
+	"errors"
+
+	"github.com/oapi-codegen/runtime"
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
+
+// Defines values for BulletTargetScope.
+const (
+	Bullet BulletTargetScope = "bullet"
+)
+
+// Valid indicates whether the value is a known member of the BulletTargetScope enum.
+func (e BulletTargetScope) Valid() bool {
+	switch e {
+	case Bullet:
+		return true
+	default:
+		return false
+	}
+}
 
 // Defines values for FillRequestLocale.
 const (
@@ -115,6 +134,30 @@ func (e JobDescriptionLocale) Valid() bool {
 	}
 }
 
+// Defines values for NoFitReasonPrimary.
+const (
+	IndustryMismatch     NoFitReasonPrimary = "industry_mismatch"
+	InsufficientEvidence NoFitReasonPrimary = "insufficient_evidence"
+	SeniorityGap         NoFitReasonPrimary = "seniority_gap"
+	SkillsGap            NoFitReasonPrimary = "skills_gap"
+)
+
+// Valid indicates whether the value is a known member of the NoFitReasonPrimary enum.
+func (e NoFitReasonPrimary) Valid() bool {
+	switch e {
+	case IndustryMismatch:
+		return true
+	case InsufficientEvidence:
+		return true
+	case SeniorityGap:
+		return true
+	case SkillsGap:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for RequirementCategory.
 const (
 	RequirementCategoryExperience     RequirementCategory = "experience"
@@ -169,18 +212,54 @@ func (e SeniorityLevel) Valid() bool {
 	}
 }
 
-// Defines values for SuggestionType.
+// Defines values for SkillTargetScope.
 const (
-	AddBullet     SuggestionType = "add_bullet"
-	RewriteBullet SuggestionType = "rewrite_bullet"
+	SkillTargetScopeSkill SkillTargetScope = "skill"
 )
 
-// Valid indicates whether the value is a known member of the SuggestionType enum.
-func (e SuggestionType) Valid() bool {
+// Valid indicates whether the value is a known member of the SkillTargetScope enum.
+func (e SkillTargetScope) Valid() bool {
+	switch e {
+	case SkillTargetScopeSkill:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for SuggestionKind.
+const (
+	AddBullet      SuggestionKind = "add_bullet"
+	AddSkill       SuggestionKind = "add_skill"
+	RewriteBullet  SuggestionKind = "rewrite_bullet"
+	RewriteSummary SuggestionKind = "rewrite_summary"
+)
+
+// Valid indicates whether the value is a known member of the SuggestionKind enum.
+func (e SuggestionKind) Valid() bool {
 	switch e {
 	case AddBullet:
 		return true
+	case AddSkill:
+		return true
 	case RewriteBullet:
+		return true
+	case RewriteSummary:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for SummaryTargetScope.
+const (
+	Summary SummaryTargetScope = "summary"
+)
+
+// Valid indicates whether the value is a known member of the SummaryTargetScope enum.
+func (e SummaryTargetScope) Valid() bool {
+	switch e {
+	case Summary:
 		return true
 	default:
 		return false
@@ -241,6 +320,30 @@ func (e TailorRequestLocale) Valid() bool {
 	}
 }
 
+// Defines values for TailorResponseFitVerdict.
+const (
+	NoFit      TailorResponseFitVerdict = "no_fit"
+	PartialFit TailorResponseFitVerdict = "partial_fit"
+	StrongFit  TailorResponseFitVerdict = "strong_fit"
+	WeakFit    TailorResponseFitVerdict = "weak_fit"
+)
+
+// Valid indicates whether the value is a known member of the TailorResponseFitVerdict enum.
+func (e TailorResponseFitVerdict) Valid() bool {
+	switch e {
+	case NoFit:
+		return true
+	case PartialFit:
+		return true
+	case StrongFit:
+		return true
+	case WeakFit:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for WorkerAnalyzeRequestLocale.
 const (
 	WorkerAnalyzeRequestLocaleDa WorkerAnalyzeRequestLocale = "da"
@@ -295,6 +398,23 @@ func (e WorkerAnalyzeRequestLocale) Valid() bool {
 	}
 }
 
+// BulletTarget defines model for BulletTarget.
+type BulletTarget struct {
+	// ItemIndex Index into `resume.sections[section_index].items[]`. The pointed-at
+	// section MUST be one whose items have a `description` field:
+	// employment, education, certifications, projects,
+	// extraCurricularActivities. Skills/Languages/References sections
+	// are not valid targets for rewrite_bullet/add_bullet.
+	ItemIndex int               `json:"item_index"`
+	Scope     BulletTargetScope `json:"scope"`
+
+	// SectionIndex Index into `resume.sections[]`.
+	SectionIndex int `json:"section_index"`
+}
+
+// BulletTargetScope defines model for BulletTarget.Scope.
+type BulletTargetScope string
+
 // CompatibilityScore defines model for CompatibilityScore.
 type CompatibilityScore struct {
 	Breakdown ScoreBreakdown `json:"breakdown"`
@@ -305,16 +425,38 @@ type CompatibilityScore struct {
 	Total int `json:"total"`
 }
 
+// Evidence defines model for Evidence.
+type Evidence struct {
+	Source EvidenceSource `json:"source"`
+
+	// Text The evidence text verbatim from the resume.
+	Text string `json:"text"`
+}
+
+// EvidenceSource defines model for EvidenceSource.
+type EvidenceSource struct {
+	// FragmentAnchor Verbatim HTML fragment within the item's description (or skill
+	// label / etc) that this evidence quotes. Empty when the evidence
+	// is the whole item (e.g. a SkillItem or LanguageItem). Used by
+	// auditing and by the writer to know exactly which span to ground
+	// against — NEVER for regex or substring rewriting in the writer.
+	FragmentAnchor *string `json:"fragment_anchor,omitempty"`
+
+	// ItemIndex Index into that section's `items[]`.
+	ItemIndex int `json:"item_index"`
+
+	// SectionIndex Index into `resume.sections[]` this evidence came from.
+	SectionIndex int `json:"section_index"`
+}
+
 // FillRequest defines model for FillRequest.
 type FillRequest struct {
-	// Evidence Resume bullets / facts the writer is allowed to draw from. The
-	// writer refuses (422) when none of the evidence supports the
-	// instruction — the no-fabrication gate.
-	Evidence []struct {
-		// Source e.g. 'experience[0].bullets[2]'
-		Source string `json:"source"`
-		Text   string `json:"text"`
-	} `json:"evidence"`
+	// Evidence Resume spans the writer is allowed to draw from. The writer
+	// refuses (422) when none of the evidence supports the instruction
+	// — the no-fabrication gate. Every span carries a structured
+	// EvidenceSource so the writer's grounding is auditable: we can
+	// always answer "which bullet did this proposed text come from?"
+	Evidence   []Evidence        `json:"evidence"`
 	Locale     FillRequestLocale `json:"locale"`
 	Suggestion Suggestion        `json:"suggestion"`
 }
@@ -350,6 +492,36 @@ type JobDescription struct {
 
 // JobDescriptionLocale defines model for JobDescription.Locale.
 type JobDescriptionLocale string
+
+// NoFitReason defines model for NoFitReason.
+type NoFitReason struct {
+	// Explanation One- or two-sentence reason in the user's locale, drawn from i18n
+	// strings — not free-form LLM output. Frontend shows verbatim.
+	Explanation string `json:"explanation"`
+
+	// Primary - `skills_gap`            JD's required skills aren't present in the resume
+	//                           and no anchors support adding them.
+	// - `seniority_gap`         Resume's experience level is materially off from
+	//                           what the JD asks for (junior → director, or vice
+	//                           versa).
+	// - `industry_mismatch`     Resume's occupation graph and the JD's occupation
+	//                           don't overlap (nurse vs. backend engineer).
+	// - `insufficient_evidence` Resume itself is too thin (empty descriptions,
+	//                           no experiences) for any meaningful matching.
+	Primary NoFitReasonPrimary `json:"primary"`
+}
+
+// NoFitReasonPrimary - `skills_gap`            JD's required skills aren't present in the resume
+//
+//		and no anchors support adding them.
+//	  - `seniority_gap`         Resume's experience level is materially off from
+//	    what the JD asks for (junior → director, or vice
+//	    versa).
+//	  - `industry_mismatch`     Resume's occupation graph and the JD's occupation
+//	    don't overlap (nurse vs. backend engineer).
+//	  - `insufficient_evidence` Resume itself is too thin (empty descriptions,
+//	    no experiences) for any meaningful matching.
+type NoFitReasonPrimary string
 
 // Requirement defines model for Requirement.
 type Requirement struct {
@@ -444,6 +616,19 @@ type Skill struct {
 	SourceQuote string `json:"source_quote"`
 }
 
+// SkillTarget defines model for SkillTarget.
+type SkillTarget struct {
+	Scope SkillTargetScope `json:"scope"`
+
+	// SectionIndex Index into `resume.sections[]`. The pointed-at section MUST be a
+	// SkillsSection (`type: skills`). For `add_skill`, the new SkillItem
+	// is appended to `items[]`.
+	SectionIndex int `json:"section_index"`
+}
+
+// SkillTargetScope defines model for SkillTarget.Scope.
+type SkillTargetScope string
+
 // Suggestion defines model for Suggestion.
 type Suggestion struct {
 	Id openapi_types.UUID `json:"id"`
@@ -452,8 +637,36 @@ type Suggestion struct {
 	// proposed_text. Generated by the recommender, not free-form.
 	Instruction string `json:"instruction"`
 
-	// OriginalText For rewrite: the bullet text. For add: the anchor span from the
-	// resume. Quoted to the user as proof we're not fabricating.
+	// Kind What this suggestion does to the resume. Each kind has a matching
+	// `target` shape (see SuggestionTarget) and a per-kind meaning for
+	// `original_text`:
+	//
+	// - `rewrite_bullet`   Replace one `<li>` (or `<p>`) inside
+	//                      `resume.sections[target.section_index].items[target.item_index].description`.
+	//                      `original_text` is the verbatim HTML fragment
+	//                      to find and replace.
+	// - `add_bullet`       Append a new `<li>` to the same description.
+	//                      `original_text` is the resume "anchor" — the
+	//                      existing experience text the new bullet must
+	//                      stay faithful to. The anchor is NOT in the
+	//                      description being mutated; it's evidence from
+	//                      elsewhere in the resume.
+	// - `rewrite_summary`  Replace `resume.summary.value` entirely.
+	//                      `original_text` is the current summary verbatim.
+	// - `add_skill`        Append a SkillItem to a SkillsSection.
+	//                      `original_text` is the bullet/text from the
+	//                      resume that proves the user already has the
+	//                      skill. Refused (no suggestion emitted) when
+	//                      no anchor exists — the no-fabrication gate.
+	//
+	// Suggestions can be applied in any order. Frontend matches the
+	// verbatim `original_text` substring on `rewrite_*` to stay robust
+	// against user edits between fetch and accept; if not found, the
+	// card goes stale-grayed in the UI.
+	Kind SuggestionKind `json:"kind"`
+
+	// OriginalText Per-kind semantics — see `kind`. Always shown to the user as proof
+	// of grounding ("from your resume: ...").
 	OriginalText string `json:"original_text"`
 
 	// ProposedText Empty until the writer LLM is called for this suggestion (lazy
@@ -461,31 +674,64 @@ type Suggestion struct {
 	// and cost zero LLM tokens.
 	ProposedText *string `json:"proposed_text,omitempty"`
 
-	// RequirementRef ID of the JobDescription.requirement (or skill) this suggestion
+	// RequirementRef ID of the JobDescription requirement (or skill) this suggestion
 	// addresses. Lets the frontend show "this card addresses THIS ask
 	// from the JD" with the source_quote highlighted.
 	RequirementRef string `json:"requirement_ref"`
 
-	// Type `rewrite_bullet` — there's an existing bullet the user can sharpen
-	// to match the requirement. `original_text` is the bullet,
-	// `instruction` is what to change.
-	//
-	// `add_bullet` — the requirement is missing entirely AND we found
-	// a resume anchor (existing experience that plausibly supports
-	// it). `original_text` is the anchor span the new bullet must
-	// stay faithful to; the writer is forbidden from going beyond it.
-	Type SuggestionType `json:"type"`
+	// Target Discriminated union pointing at the exact Resume object a Suggestion
+	// mutates. `scope` matches the Suggestion.kind's natural target:
+	//   rewrite_bullet, add_bullet  → BulletTarget   (scope=bullet)
+	//   rewrite_summary             → SummaryTarget  (scope=summary)
+	//   add_skill                   → SkillTarget    (scope=skill)
+	Target SuggestionTarget `json:"target"`
 }
 
-// SuggestionType `rewrite_bullet` — there's an existing bullet the user can sharpen
-// to match the requirement. `original_text` is the bullet,
-// `instruction` is what to change.
+// SuggestionKind What this suggestion does to the resume. Each kind has a matching
+// `target` shape (see SuggestionTarget) and a per-kind meaning for
+// `original_text`:
 //
-// `add_bullet` — the requirement is missing entirely AND we found
-// a resume anchor (existing experience that plausibly supports
-// it). `original_text` is the anchor span the new bullet must
-// stay faithful to; the writer is forbidden from going beyond it.
-type SuggestionType string
+//   - `rewrite_bullet`   Replace one `<li>` (or `<p>`) inside
+//     `resume.sections[target.section_index].items[target.item_index].description`.
+//     `original_text` is the verbatim HTML fragment
+//     to find and replace.
+//   - `add_bullet`       Append a new `<li>` to the same description.
+//     `original_text` is the resume "anchor" — the
+//     existing experience text the new bullet must
+//     stay faithful to. The anchor is NOT in the
+//     description being mutated; it's evidence from
+//     elsewhere in the resume.
+//   - `rewrite_summary`  Replace `resume.summary.value` entirely.
+//     `original_text` is the current summary verbatim.
+//   - `add_skill`        Append a SkillItem to a SkillsSection.
+//     `original_text` is the bullet/text from the
+//     resume that proves the user already has the
+//     skill. Refused (no suggestion emitted) when
+//     no anchor exists — the no-fabrication gate.
+//
+// Suggestions can be applied in any order. Frontend matches the
+// verbatim `original_text` substring on `rewrite_*` to stay robust
+// against user edits between fetch and accept; if not found, the
+// card goes stale-grayed in the UI.
+type SuggestionKind string
+
+// SuggestionTarget Discriminated union pointing at the exact Resume object a Suggestion
+// mutates. `scope` matches the Suggestion.kind's natural target:
+//
+//	rewrite_bullet, add_bullet  → BulletTarget   (scope=bullet)
+//	rewrite_summary             → SummaryTarget  (scope=summary)
+//	add_skill                   → SkillTarget    (scope=skill)
+type SuggestionTarget struct {
+	union json.RawMessage
+}
+
+// SummaryTarget Targets `resume.summary.value`. No indices — there's exactly one summary.
+type SummaryTarget struct {
+	Scope SummaryTargetScope `json:"scope"`
+}
+
+// SummaryTargetScope defines model for SummaryTarget.Scope.
+type SummaryTargetScope string
 
 // TailorRequest defines model for TailorRequest.
 type TailorRequest struct {
@@ -493,9 +739,21 @@ type TailorRequest struct {
 	JobDescription string              `json:"job_description"`
 	Locale         TailorRequestLocale `json:"locale"`
 
-	// Resume Full Resume DTO from @laddro-app/schemas/resume. Reffed loosely
-	// here because YAML cross-spec refs are awkward — code uses the
-	// generated Resume type directly.
+	// Resume The full Resume DTO. ai-core consumes it typed and walks every
+	// section, item, and description in order to produce Suggestions
+	// with valid `target.section_index` / `target.item_index` indices
+	// into THIS resume. The frontend must send the resume verbatim
+	// (no stripping) so suggestions remain applicable.
+	//
+	// Consumers MUST import the typed Resume from
+	// `@laddro-app/schemas/resume`:
+	//   - TS:  `import type { components } from '@laddro-app/schemas/resume'`
+	//          then `components['schemas']['Resume']`
+	//   - Go:  `github.com/laddro-app/laddro-schemas/go/resume.Resume`
+	//
+	// The field is declared as `type: object` here only because OpenAPI
+	// 3.1 cross-file `$ref` support is uneven across our codegen tools.
+	// Treat it as `Resume` at every call site.
 	Resume map[string]interface{} `json:"resume"`
 }
 
@@ -505,9 +763,48 @@ type TailorRequestLocale string
 // TailorResponse defines model for TailorResponse.
 type TailorResponse struct {
 	CompatibilityScore CompatibilityScore `json:"compatibility_score"`
-	ParsedJob          JobDescription     `json:"parsed_job"`
-	Suggestions        []Suggestion       `json:"suggestions"`
+
+	// FitVerdict Honest verdict on whether this resume can be tailored to this JD
+	// at all. Derived from compatibility_score, the recommender's anchor
+	// coverage (how many required skills have any resume evidence), and
+	// the seniority gap.
+	//
+	// - `strong_fit`   normal stack, most requirements have anchors.
+	// - `partial_fit`  normal stack, some gaps the user should know about.
+	// - `weak_fit`     stack rendered with a banner: "low fit, consider
+	//                  a different job — these are what we could find."
+	// - `no_fit`       suggestions[] is empty by construction. Frontend
+	//                  shows "this isn't your job — we don't fake resumes,
+	//                  we prepare you for the job." Backed by no_fit_reason.
+	//
+	// ai-core owns the decision rule. Frontend branches UX off this enum
+	// only — it never re-derives the verdict from the score.
+	FitVerdict TailorResponseFitVerdict `json:"fit_verdict"`
+
+	// NoFitReason Present when fit_verdict is `weak_fit` or `no_fit`. Machine-readable
+	// primary cause + locale-aware human explanation the frontend can
+	// surface verbatim.
+	NoFitReason *NoFitReason   `json:"no_fit_reason,omitempty"`
+	ParsedJob   JobDescription `json:"parsed_job"`
+	Suggestions []Suggestion   `json:"suggestions"`
 }
+
+// TailorResponseFitVerdict Honest verdict on whether this resume can be tailored to this JD
+// at all. Derived from compatibility_score, the recommender's anchor
+// coverage (how many required skills have any resume evidence), and
+// the seniority gap.
+//
+//   - `strong_fit`   normal stack, most requirements have anchors.
+//   - `partial_fit`  normal stack, some gaps the user should know about.
+//   - `weak_fit`     stack rendered with a banner: "low fit, consider
+//     a different job — these are what we could find."
+//   - `no_fit`       suggestions[] is empty by construction. Frontend
+//     shows "this isn't your job — we don't fake resumes,
+//     we prepare you for the job." Backed by no_fit_reason.
+//
+// ai-core owns the decision rule. Frontend branches UX off this enum
+// only — it never re-derives the verdict from the score.
+type TailorResponseFitVerdict string
 
 // WorkerAnalyzeRequest defines model for WorkerAnalyzeRequest.
 type WorkerAnalyzeRequest struct {
@@ -522,3 +819,122 @@ type WorkerAnalyzeRequestLocale string
 
 // WorkerAnalyzeResponse defines model for WorkerAnalyzeResponse.
 type WorkerAnalyzeResponse = JobDescription
+
+// AsBulletTarget returns the union data inside the SuggestionTarget as a BulletTarget
+func (t SuggestionTarget) AsBulletTarget() (BulletTarget, error) {
+	var body BulletTarget
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromBulletTarget overwrites any union data inside the SuggestionTarget as the provided BulletTarget
+func (t *SuggestionTarget) FromBulletTarget(v BulletTarget) error {
+	v.Scope = "bullet"
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeBulletTarget performs a merge with any union data inside the SuggestionTarget, using the provided BulletTarget
+func (t *SuggestionTarget) MergeBulletTarget(v BulletTarget) error {
+	v.Scope = "bullet"
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsSummaryTarget returns the union data inside the SuggestionTarget as a SummaryTarget
+func (t SuggestionTarget) AsSummaryTarget() (SummaryTarget, error) {
+	var body SummaryTarget
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromSummaryTarget overwrites any union data inside the SuggestionTarget as the provided SummaryTarget
+func (t *SuggestionTarget) FromSummaryTarget(v SummaryTarget) error {
+	v.Scope = "summary"
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeSummaryTarget performs a merge with any union data inside the SuggestionTarget, using the provided SummaryTarget
+func (t *SuggestionTarget) MergeSummaryTarget(v SummaryTarget) error {
+	v.Scope = "summary"
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsSkillTarget returns the union data inside the SuggestionTarget as a SkillTarget
+func (t SuggestionTarget) AsSkillTarget() (SkillTarget, error) {
+	var body SkillTarget
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromSkillTarget overwrites any union data inside the SuggestionTarget as the provided SkillTarget
+func (t *SuggestionTarget) FromSkillTarget(v SkillTarget) error {
+	v.Scope = "skill"
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeSkillTarget performs a merge with any union data inside the SuggestionTarget, using the provided SkillTarget
+func (t *SuggestionTarget) MergeSkillTarget(v SkillTarget) error {
+	v.Scope = "skill"
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t SuggestionTarget) Discriminator() (string, error) {
+	var discriminator struct {
+		Discriminator string `json:"scope"`
+	}
+	err := json.Unmarshal(t.union, &discriminator)
+	return discriminator.Discriminator, err
+}
+
+func (t SuggestionTarget) ValueByDiscriminator() (interface{}, error) {
+	discriminator, err := t.Discriminator()
+	if err != nil {
+		return nil, err
+	}
+	switch discriminator {
+	case "bullet":
+		return t.AsBulletTarget()
+	case "skill":
+		return t.AsSkillTarget()
+	case "summary":
+		return t.AsSummaryTarget()
+	default:
+		return nil, errors.New("unknown discriminator value: " + discriminator)
+	}
+}
+
+func (t SuggestionTarget) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *SuggestionTarget) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
