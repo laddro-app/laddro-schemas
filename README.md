@@ -13,6 +13,13 @@ resume/
   fixtures/
     completeness/                      canonical inputs + expected scores
     enforce-one-resume-limit/          canonical inputs + expected allow/block
+cover-letter/
+  cover-letter.v1.yaml                 OpenAPI 3.1 component schemas
+tailor/
+  tailor.v1.yaml                       OpenAPI 3.1 component schemas
+  fixtures/
+    worker-output/<locale>/<industry>/ canonical JD inputs + expected JobDescription
+                                       (14 locales × ≥8 industries — CI floor)
 scripts/
   generate-ts.sh                       runs openapi-typescript
   generate-go.sh                       runs oapi-codegen
@@ -34,16 +41,28 @@ import type { components } from '@laddro-app/schemas/resume';
 type Resume = components['schemas']['Resume'];
 ```
 
-### Go (laddro-career-api)
+```ts
+import type { components } from '@laddro-app/schemas/tailor';
+
+type JobDescription = components['schemas']['JobDescription'];
+type TailorResponse = components['schemas']['TailorResponse'];
+```
+
+### Go (laddro-career-api, laddro-ai-core)
 
 ```bash
 go get github.com/laddro-app/laddro-schemas/go/resume
+go get github.com/laddro-app/laddro-schemas/go/tailor
 ```
 
 ```go
-import "github.com/laddro-app/laddro-schemas/go/resume"
+import (
+  "github.com/laddro-app/laddro-schemas/go/resume"
+  "github.com/laddro-app/laddro-schemas/go/tailor"
+)
 
 var r resume.Resume
+var jd tailor.JobDescription
 ```
 
 ## Regenerating locally
