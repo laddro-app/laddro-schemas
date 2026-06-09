@@ -1,0 +1,22 @@
+extends:
+  - recommended
+
+rules:
+  # These specs are component-only — types consumed by Go and TypeScript
+  # consumers via codegen. They intentionally have no `paths:` and no
+  # `servers:` block; the operations live in each service's own OpenAPI.
+  # Disabling these recommended rules keeps the lint job honest for the
+  # types-only style.
+  no-empty-servers: off
+  no-server-example.com: off
+  # The schemas are component-only; codegen consumes everything as types,
+  # which the lint can't see. Suppressing the false "unused" warnings.
+  no-unused-components: off
+  # Repo-level LICENSE already covers all specs; per-info license blocks
+  # would be duplication.
+  info-license: off
+  # We use `nullable: true` (OpenAPI 3.0 syntax) intentionally — oapi-codegen
+  # does not yet support the 3.1 `type: [string, "null"]` union form. The
+  # struct rule flags this as "Property `nullable` is not expected here";
+  # disabling here keeps lint green until oapi-codegen catches up to 3.1.
+  struct: off

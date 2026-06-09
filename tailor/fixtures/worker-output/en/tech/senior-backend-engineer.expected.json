@@ -11,14 +11,16 @@
   },
   "skills": [
     {
+      "id": "d6f58dde-1770-4560-829d-c7e37dd2d642",
       "label": "Go",
       "normalized": "go",
       "esco_id": "",
       "required": true,
-      "confidence": 0.90,
+      "confidence": 0.9,
       "source_quote": "Design and ship services in Go that move events from Kafka into ClickHouse with sub-second tail latency"
     },
     {
+      "id": "f9643e94-ba3e-487f-92f3-371643f95fe6",
       "label": "Python",
       "normalized": "python",
       "esco_id": "http://data.europa.eu/esco/skill/ccd0a1d9-afda-43d9-b901-96344886e14d",
@@ -27,6 +29,7 @@
       "source_quote": "5+ years building production backend services, ideally in Go, Python, or a similar systems language"
     },
     {
+      "id": "199104e9-ed15-4f17-97d6-e130ed75f42d",
       "label": "PostgreSQL",
       "normalized": "postgresql",
       "esco_id": "http://data.europa.eu/esco/skill/a8d07b5a-c1a1-42c6-9d53-db9c7a2ca996",
@@ -35,6 +38,7 @@
       "source_quote": "Deep familiarity with PostgreSQL or another relational database at scale (sharding, replication, query tuning)"
     },
     {
+      "id": "d23c49a9-e5b0-401b-95a8-9ad6ec2b6e6b",
       "label": "Kubernetes",
       "normalized": "kubernetes",
       "esco_id": "",
@@ -43,6 +47,7 @@
       "source_quote": "Hands-on experience operating services on Kubernetes in a public cloud (AWS, GCP, or Azure)"
     },
     {
+      "id": "744831cb-4cab-4d42-82f2-88b28bfba93e",
       "label": "cloud technologies",
       "normalized": "cloud technologies",
       "esco_id": "http://data.europa.eu/esco/skill/bd14968e-e409-45af-b362-3495ed7b10e0",
@@ -51,14 +56,16 @@
       "source_quote": "Hands-on experience operating services on Kubernetes in a public cloud (AWS, GCP, or Azure)"
     },
     {
+      "id": "559d665a-64c7-4829-a897-c69afc3e297a",
       "label": "distributed computing",
       "normalized": "distributed computing",
       "esco_id": "http://data.europa.eu/esco/skill/897b393f-e7e0-4248-a40d-d77119694e83",
       "required": true,
-      "confidence": 0.90,
+      "confidence": 0.9,
       "source_quote": "Comfort with distributed systems trade-offs: CAP, idempotency, exactly-once semantics"
     },
     {
+      "id": "2664a652-fb1e-47dc-8222-17604bfc4a10",
       "label": "Kafka",
       "normalized": "kafka",
       "esco_id": "",
@@ -67,6 +74,7 @@
       "source_quote": "Design and ship services in Go that move events from Kafka into ClickHouse with sub-second tail latency"
     },
     {
+      "id": "9d4892c9-3652-4ab3-9e41-61aecdf997df",
       "label": "ICT code review",
       "normalized": "ict code review",
       "esco_id": "http://data.europa.eu/esco/skill/9d1b08b3-ba1e-41f6-a466-1ac1e62eb5f0",
@@ -75,22 +83,25 @@
       "source_quote": "Review code from teammates daily and raise the team's bar for testing and observability"
     },
     {
+      "id": "8080700c-2c41-4414-a6e9-5338d6dd3669",
       "label": "mentor individuals",
       "normalized": "mentor individuals",
       "esco_id": "http://data.europa.eu/esco/skill/a584a638-a2c0-4b3c-bdf3-a64f87225be9",
       "required": true,
-      "confidence": 0.90,
+      "confidence": 0.9,
       "source_quote": "Track record of mentoring less senior engineers"
     },
     {
+      "id": "2f04fb41-dec0-42d9-b6d3-443ca1133404",
       "label": "stream processing",
       "normalized": "stream processing",
       "esco_id": "",
       "required": false,
-      "confidence": 0.90,
+      "confidence": 0.9,
       "source_quote": "Experience with stream processing (Kafka Streams, Flink, or similar)"
     },
     {
+      "id": "c1d2e54d-8427-434a-8b71-49226cf3492c",
       "label": "Docker",
       "normalized": "docker",
       "esco_id": "",
@@ -101,36 +112,42 @@
   ],
   "requirements": [
     {
+      "id": "57a0264a-85b9-4ac4-9992-6e3558a621c8",
       "text": "Design and ship services in Go that move events from Kafka into ClickHouse with sub-second tail latency",
       "category": "responsibility",
-      "confidence": 0.90,
+      "confidence": 0.9,
       "source_quote": "Design and ship services in Go that move events from Kafka into ClickHouse with sub-second tail latency"
     },
     {
+      "id": "15ac4b2e-aba9-4113-86fe-b3b145e28f58",
       "text": "Run incident response on a weekly on-call rotation with two other engineers",
       "category": "responsibility",
-      "confidence": 0.90,
+      "confidence": 0.9,
       "source_quote": "Run incident response on a weekly on-call rotation with two other engineers"
     },
     {
+      "id": "41e4aaeb-efaf-4ef0-a131-5fbd6cd7b4d6",
       "text": "Review code from teammates daily and raise the team's bar for testing and observability",
       "category": "responsibility",
       "confidence": 0.85,
       "source_quote": "Review code from teammates daily and raise the team's bar for testing and observability"
     },
     {
+      "id": "956b4817-b05f-40b5-926e-922420594cfc",
       "text": "Partner with the data science team on the schema of new event types and the back-pressure model",
       "category": "responsibility",
       "confidence": 0.85,
       "source_quote": "Partner with the data science team on the schema of new event types and the back-pressure model"
     },
     {
+      "id": "cd8546ab-8881-49ea-945a-2383d04612cb",
       "text": "5+ years building production backend services",
       "category": "experience",
       "confidence": 0.95,
       "source_quote": "5+ years building production backend services, ideally in Go, Python, or a similar systems language"
     },
     {
+      "id": "afe439d5-f178-4a45-9175-a65b72c34bb2",
       "text": "Background in fraud, AML, or another high-stakes domain",
       "category": "experience",
       "confidence": 0.85,

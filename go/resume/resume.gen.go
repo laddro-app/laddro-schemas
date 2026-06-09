@@ -382,7 +382,7 @@ type ExtraCurricularActivitiesSectionType string
 type LanguageItem struct {
 	Language string `json:"language"`
 
-	// Level Free text level e.g. Native
+	// Level Free text level e.g. Native, C1, B2, Conversational.
 	Level *string `json:"level,omitempty"`
 }
 

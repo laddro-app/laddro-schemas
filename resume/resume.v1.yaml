@@ -225,7 +225,7 @@ components:
       required: [language]
       properties:
         language: { type: string }
-        level:    { type: string, description: Free text level e.g. Native, C1, B2, Conversational. }
+        level:    { type: string, description: "Free text level e.g. Native, C1, B2, Conversational." }
 
     CertificationsSection:
       type: object

@@ -3,6 +3,27 @@
 All notable changes to `@laddro-app/schemas` are documented here.
 This package follows [Semantic Versioning](https://semver.org/).
 
+## 0.5.0 — 2026-06-09
+
+### Added (tailor 2.0.0 — BREAKING)
+- `Skill.id` (uuid) and `Requirement.id` (uuid) are now required. The
+  worker assigns these at extraction time so the frontend and the
+  orchestrator can resolve `Suggestion.requirement_ref` to the exact
+  Skill or Requirement it addresses. IDs are scoped to a single
+  `TailorResponse` (not stable across worker calls).
+- Two existing fixtures updated to include IDs.
+
+### Changed
+- Repo-level `redocly.yaml` added — silences the rules that don't
+  apply to component-only specs (`no-empty-servers`, `no-unused-components`,
+  `info-license`, `struct`) so `npm run lint` and CI lint stay green.
+- `.github/workflows/verify.yml` openapi-lint job now covers
+  `resume.v1.yaml`, `cover-letter.v1.yaml`, AND `tailor.v1.yaml`
+  (previously only resume). The `LanguageItem.level` description with
+  unquoted commas is fixed; `Resume.guidedFlowStatus` keeps `nullable:
+  true` (OpenAPI 3.0 form) because oapi-codegen does not yet support
+  the 3.1 union form — see comment in `redocly.yaml`.
+
 ## 0.4.0 — 2026-06-09
 
 ### Added
