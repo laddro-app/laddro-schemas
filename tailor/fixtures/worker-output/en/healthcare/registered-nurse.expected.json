@@ -11,6 +11,7 @@
   },
   "skills": [
     {
+      "id": "a2f1e2d1-2a20-418e-95fb-2ad466c5c88a",
       "label": "monitor patient's vital signs",
       "normalized": "monitor patient's vital signs",
       "esco_id": "http://data.europa.eu/esco/skill/60f826be-0c1b-413b-aad5-4f7546622e16",
@@ -19,6 +20,7 @@
       "source_quote": "Monitor patients' vital signs and recognise early signs of deterioration"
     },
     {
+      "id": "63438373-c8fc-47f4-9543-9f025725e28a",
       "label": "administer prescribed medication",
       "normalized": "administer prescribed medication",
       "esco_id": "http://data.europa.eu/esco/skill/1fd57242-267e-46df-bd8c-849fdd593a50",
@@ -27,22 +29,25 @@
       "source_quote": "Administer prescribed medication, including IV antibiotics, anticoagulants and analgesics"
     },
     {
+      "id": "7eda40e1-c92a-4833-8cd0-907b59d2e32d",
       "label": "use electronic health records in nursing",
       "normalized": "electronic health records",
       "esco_id": "http://data.europa.eu/esco/skill/a46743b7-ff8c-49b6-99f7-7fa5bc241771",
       "required": true,
-      "confidence": 0.90,
+      "confidence": 0.9,
       "source_quote": "Document all care in the electronic health record before end-of-shift handover"
     },
     {
+      "id": "4dd22889-dff5-4996-9565-bf742572fcbf",
       "label": "carry out wound care",
       "normalized": "wound care",
       "esco_id": "http://data.europa.eu/esco/skill/1c6736c2-77de-419c-9b84-8932e15abc21",
       "required": true,
-      "confidence": 0.90,
+      "confidence": 0.9,
       "source_quote": "Perform wound assessment and dressing changes for surgical and pressure-related wounds"
     },
     {
+      "id": "6c5d4165-f6f0-4018-ab79-1c946b17ddc7",
       "label": "triage clients",
       "normalized": "triage",
       "esco_id": "http://data.europa.eu/esco/skill/e704d860-6f06-401e-abb3-a7fb959c046f",
@@ -51,6 +56,7 @@
       "source_quote": "Triage admissions arriving from the Emergency Department"
     },
     {
+      "id": "c337bb1d-079b-4d82-8011-69b8c831ba20",
       "label": "infection control",
       "normalized": "infection control",
       "esco_id": "http://data.europa.eu/esco/skill/6d13053b-ee35-492c-8976-8178420df398",
@@ -59,14 +65,16 @@
       "source_quote": "Maintain strict infection prevention and control standards on the ward"
     },
     {
+      "id": "2624d021-d284-4955-9096-2e4b9d1e3d62",
       "label": "BLS",
       "normalized": "bls",
       "esco_id": "",
       "required": true,
-      "confidence": 0.90,
+      "confidence": 0.9,
       "source_quote": "Current BLS certification"
     },
     {
+      "id": "636d9813-542e-4c06-be1d-040acec13ca9",
       "label": "mentor individuals",
       "normalized": "mentor individuals",
       "esco_id": "http://data.europa.eu/esco/skill/a584a638-a2c0-4b3c-bdf3-a64f87225be9",
@@ -75,6 +83,7 @@
       "source_quote": "Mentorship of student nurses or new graduates"
     },
     {
+      "id": "84dbfc08-d8e8-4ee4-a030-a85c8bb709ee",
       "label": "EpicCare electronic health record",
       "normalized": "epiccare ehr",
       "esco_id": "",
@@ -85,66 +94,77 @@
   ],
   "requirements": [
     {
+      "id": "3fe1421f-82a3-4e37-8dfa-0a31a1c41af6",
       "text": "Monitor patients' vital signs and recognise early signs of deterioration",
       "category": "responsibility",
       "confidence": 0.95,
       "source_quote": "Monitor patients' vital signs and recognise early signs of deterioration"
     },
     {
+      "id": "f7bab97e-447e-4e14-9753-9cbf4115cff9",
       "text": "Administer prescribed medication, including IV antibiotics, anticoagulants and analgesics",
       "category": "responsibility",
       "confidence": 0.95,
       "source_quote": "Administer prescribed medication, including IV antibiotics, anticoagulants and analgesics"
     },
     {
+      "id": "204922e4-27b5-46d2-9004-429433bc96a8",
       "text": "Document all care in the electronic health record before end-of-shift handover",
       "category": "responsibility",
-      "confidence": 0.90,
+      "confidence": 0.9,
       "source_quote": "Document all care in the electronic health record before end-of-shift handover"
     },
     {
+      "id": "eb5d748c-e750-458f-af0b-c542e9dbda33",
       "text": "Communicate with the multidisciplinary team — consultants, physiotherapists, social workers — on care plans",
       "category": "responsibility",
-      "confidence": 0.90,
+      "confidence": 0.9,
       "source_quote": "Communicate with the multidisciplinary team — consultants, physiotherapists, social workers — on care plans"
     },
     {
+      "id": "9565a60a-8fe7-427d-a23f-dfcc0c0394f0",
       "text": "Registration with the Nursing and Midwifery Board of Ireland (NMBI)",
       "category": "qualification",
       "confidence": 0.95,
       "source_quote": "Registration with the Nursing and Midwifery Board of Ireland (NMBI)"
     },
     {
+      "id": "f22c6d11-9436-4931-b791-4188b75b0ffc",
       "text": "Current BLS certification",
       "category": "qualification",
-      "confidence": 0.90,
+      "confidence": 0.9,
       "source_quote": "Current BLS certification"
     },
     {
+      "id": "ad5db15f-323b-47e6-8a25-312001d1999e",
       "text": "Evidence of recent CPD activity",
       "category": "qualification",
       "confidence": 0.85,
       "source_quote": "Evidence of recent CPD activity"
     },
     {
+      "id": "d7e6dc05-43c3-49ee-8958-496abe728e57",
       "text": "At least 1 year of post-registration experience in an acute setting",
       "category": "experience",
-      "confidence": 0.90,
+      "confidence": 0.9,
       "source_quote": "At least 1 year of post-registration experience in an acute setting"
     },
     {
+      "id": "617c593c-cf51-4d21-b865-1f435c48418d",
       "text": "Demonstrate empathy with vulnerable adults",
       "category": "soft",
       "confidence": 0.85,
       "source_quote": "demonstrate empathy with vulnerable adults"
     },
     {
+      "id": "eb90674a-8c01-45f9-b87d-b5877ffd7379",
       "text": "Calm decision-making under pressure",
       "category": "soft",
       "confidence": 0.85,
       "source_quote": "calm decision-making under pressure"
     },
     {
+      "id": "7d7da8d6-68ec-407f-97f7-77656ffd4442",
       "text": "Communicate clearly with patients and families at distressing moments",
       "category": "soft",
       "confidence": 0.85,

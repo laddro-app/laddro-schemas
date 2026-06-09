@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Laddro Tailor Schema
-  version: 1.0.0
+  version: 2.0.0
   description: |
     Canonical contract for the honest-tailor pipeline. Single source of truth
     consumed by:
@@ -42,6 +42,13 @@ info:
     response includes a `fit_verdict` so we can refuse to tailor honestly
     when the resume doesn't match the JD at all (the "honest tailor"
     promise made explicit at the API).
+
+    2.0.0 (2026-06-09): BREAKING. Skill.id and Requirement.id are now
+    required. Without stable IDs, Suggestion.requirement_ref had no shape
+    to resolve to — it was opaque. The new IDs are UUIDs assigned by the
+    worker at extraction time and scoped to a single TailorResponse (not
+    stable across calls). Fixtures and Pydantic models updated; ai-core
+    + frontend consume the bumped types from @laddro-app/schemas@0.5.0.
 
 components:
   schemas:
@@ -126,8 +133,19 @@ components:
 
     Skill:
       type: object
-      required: [label, normalized, required, confidence, source_quote]
+      required: [id, label, normalized, required, confidence, source_quote]
       properties:
+        id:
+          type: string
+          format: uuid
+          description: |
+            Stable identifier. The worker assigns a UUID at extraction time
+            so the orchestrator and the frontend can reference the same
+            Skill across the request → suggestion → fill round-trip. Suggestion
+            records targeting this skill set `requirement_ref` to this UUID.
+            Different worker calls on the same JD MAY produce different
+            UUIDs — IDs are scoped to a single TailorResponse, not stable
+            across calls.
         label:
           type: string
           description: Skill name as it appeared in the JD, in source language.
@@ -163,8 +181,15 @@ components:
 
     Requirement:
       type: object
-      required: [text, category, confidence, source_quote]
+      required: [id, text, category, confidence, source_quote]
       properties:
+        id:
+          type: string
+          format: uuid
+          description: |
+            Stable identifier scoped to a single TailorResponse. Suggestion
+            records targeting this requirement set `requirement_ref` to
+            this UUID. See Skill.id for the same scoping rule.
         text:
           type: string
           description: The requirement span, verbatim from raw_text.

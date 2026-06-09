@@ -213,6 +213,7 @@ order identical so diffs stay readable.
   },
   "skills": [
     {
+      "id":           "<uuid v4>",
       "label":        "<as-written in the JD, source language>",
       "normalized":   "<lowercase canonical, deduped>",
       "esco_id":      "<http://data.europa.eu/esco/skill/... or empty>",
@@ -223,6 +224,7 @@ order identical so diffs stay readable.
   ],
   "requirements": [
     {
+      "id":           "<uuid v4>",
       "text":         "<verbatim substring of raw_text>",
       "category":     "<skill|responsibility|qualification|experience|soft>",
       "confidence":   0.85,
@@ -231,6 +233,10 @@ order identical so diffs stay readable.
   ]
 }
 ```
+
+UUIDs are scoped to a single fixture / TailorResponse — they are not stable
+across worker calls and don't need to mean anything globally. Generate fresh
+ones with `uuidgen | tr A-Z a-z` (macOS) or `python -c "import uuid; print(uuid.uuid4())"`.
 
 ---
 

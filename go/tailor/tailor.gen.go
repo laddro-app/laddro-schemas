@@ -531,9 +531,14 @@ type Requirement struct {
 	// welder's "MIG certification" and a lawyer's "bar admission" both
 	// map to `qualification`. New categories require a contract bump,
 	// not a code patch.
-	Category    RequirementCategory `json:"category"`
-	Confidence  float32             `json:"confidence"`
-	SourceQuote string              `json:"source_quote"`
+	Category   RequirementCategory `json:"category"`
+	Confidence float32             `json:"confidence"`
+
+	// Id Stable identifier scoped to a single TailorResponse. Suggestion
+	// records targeting this requirement set `requirement_ref` to
+	// this UUID. See Skill.id for the same scoping rule.
+	Id          openapi_types.UUID `json:"id"`
+	SourceQuote string             `json:"source_quote"`
 
 	// Text The requirement span, verbatim from raw_text.
 	Text string `json:"text"`
@@ -595,6 +600,15 @@ type Skill struct {
 	// skill. Empty when no link — scorer falls back to embedding
 	// similarity, never to string matching.
 	EscoId *string `json:"esco_id,omitempty"`
+
+	// Id Stable identifier. The worker assigns a UUID at extraction time
+	// so the orchestrator and the frontend can reference the same
+	// Skill across the request → suggestion → fill round-trip. Suggestion
+	// records targeting this skill set `requirement_ref` to this UUID.
+	// Different worker calls on the same JD MAY produce different
+	// UUIDs — IDs are scoped to a single TailorResponse, not stable
+	// across calls.
+	Id openapi_types.UUID `json:"id"`
 
 	// Label Skill name as it appeared in the JD, in source language.
 	Label string `json:"label"`

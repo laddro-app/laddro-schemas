@@ -12,8 +12,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: '22' }
-      - name: Lint resume.v1.yaml
-        run: npx --yes @redocly/cli@latest lint resume/resume.v1.yaml
+      - name: Lint all spec files
+        run: |
+          npx --yes @redocly/cli@latest lint \
+            resume/resume.v1.yaml \
+            cover-letter/cover-letter.v1.yaml \
+            tailor/tailor.v1.yaml
 
   ts-codegen:
     runs-on: ubuntu-latest
