@@ -103,3 +103,150 @@ components:
           type: number
         lineHeight:
           type: number
+
+    # =================================================================
+    # Cover Letter Generation API — request / response for ai-core
+    # `POST /v1/cover-letter`. Both the standalone /build-cover-letter
+    # page (laddro-web-app → laddro-backend → laddro-ai-core) and the
+    # tailor flow (auto-mode trio worker + review-mode post-save trigger)
+    # use this single endpoint. Per-field fill-the-gaps: empty inputs are
+    # synthesized by ai-core from the provided resume + JD; populated
+    # inputs are echoed verbatim. See
+    # obsidian/laddro/plans/cover-letter-ai-core.md for the architectural
+    # rationale and the locale-template strings.
+    # =================================================================
+
+    CoverLetterGenerateRequest:
+      type: object
+      required: [resume, jobDescription, locale]
+      description: |
+        Request body for `POST /v1/cover-letter` on laddro-ai-core.
+
+        `initialContent` is a possibly-partial envelope — the caller passes
+        whatever it already has from the user (the standalone CL page often
+        has everything; the tailor flow usually has only company name on
+        `employerDetails`). ai-core fills empty personal fields from the
+        resume verbatim and runs a narrow LLM extract on the JD for empty
+        employer fields. Always-overwritten: `letterContent` is generated.
+      properties:
+        initialContent:
+          type: object
+          description: |
+            Partial content envelope. Every nested field is optional. ai-core
+            echoes what's provided and fills only the empties.
+          properties:
+            personalDetails:
+              $ref: '#/components/schemas/CoverLetterPersonalDetailsPartial'
+            employerDetails:
+              $ref: '#/components/schemas/CoverLetterEmployerDetails'
+        resume:
+          description: |
+            The candidate's V1 Resume. Used both as the source for personal
+            field fills (firstName, lastName, email, phone, city/country)
+            and as the evidence the body writer cites in the experience
+            paragraph. Required because we cannot write a believable letter
+            without grounding.
+          type: object
+        jobDescription:
+          type: string
+          minLength: 1
+          description: |
+            Raw job description text the user submitted. Used by the employer
+            extractor (only when companyName / hiringManagerName are absent)
+            and by the body writer to ground the experience paragraph.
+        positionName:
+          type: string
+          description: |
+            Position name. Tailor flow always passes this from the form. The
+            standalone page may omit it; ai-core falls back to
+            `resume.personal.role` when this is absent AND the user did not
+            fill `personalDetails.jobTitle`.
+        locale:
+          type: string
+          enum: [en, de, es, fr, it, nl, pl, pt, is, fi, sv, no, da, et]
+          description: |
+            BCP-47-ish locale code. Drives salutation + closing template
+            selection AND the body writer's output language. Every word of
+            the returned letter is in this language — no English fallback
+            phrases sneak in.
+        tone:
+          type: string
+          enum: [professional, enthusiastic, concise]
+          default: professional
+          description: |
+            Voice for the body writer. `professional` is the default formal
+            register most industries expect. `enthusiastic` leans warmer for
+            startups / creative roles. `concise` produces tighter
+            paragraphs for senior-IC roles that want signal over fluff.
+
+    CoverLetterPersonalDetailsPartial:
+      type: object
+      description: |
+        Same fields as `CoverLetterPersonalDetails` but every field is
+        optional. Used in `CoverLetterGenerateRequest.initialContent` so
+        the caller can submit whatever it already has (or nothing) and let
+        ai-core fill the gaps from the resume.
+      properties:
+        fullName: { type: string }
+        jobTitle: { type: string }
+        address: { type: string }
+        email: { type: string, format: email }
+        phone: { type: string }
+
+    CoverLetterGenerateResponse:
+      type: object
+      required: [content, filled, usage]
+      description: |
+        Result of a `POST /v1/cover-letter` call. `content` is the existing
+        `CoverLetterContent` shape — same envelope the editor and the
+        renderer already consume — so the response is drop-in for both the
+        standalone page (which then opens the editor) and the tailor worker
+        (which persists it into the reserved CL UUID slot).
+      properties:
+        content:
+          $ref: '#/components/schemas/CoverLetterContent'
+        filled:
+          type: object
+          required: [personalDetails, employerDetails]
+          description: |
+            Which fields ai-core synthesized vs echoed from the request.
+            Lets the standalone CL editor render a subtle "AI filled this"
+            badge so the user knows which fields to double-check. Empty
+            arrays mean the caller provided every field verbatim.
+          properties:
+            personalDetails:
+              type: array
+              items:
+                type: string
+                enum: [fullName, jobTitle, address, email, phone]
+            employerDetails:
+              type: array
+              items:
+                type: string
+                enum: [companyName, hiringManagerName]
+        usage:
+          $ref: '#/components/schemas/GenerationUsage'
+
+    GenerationUsage:
+      type: object
+      required: [promptTokens, outputTokens, model]
+      description: |
+        Per-call usage block returned by ai-core for any LLM-backed endpoint.
+        Centralised in the cover-letter spec because that's the first place
+        we need it; the tailor spec will reuse this shape once the same
+        accounting is added to `/v1/tailor`.
+      properties:
+        promptTokens:
+          type: integer
+          minimum: 0
+          description: Sum of input tokens across the extractor + writer calls.
+        outputTokens:
+          type: integer
+          minimum: 0
+          description: Sum of output tokens across the extractor + writer calls.
+        model:
+          type: string
+          description: |
+            Provider + model that produced the body (`gemini-2.5-flash` /
+            `gpt-4.1-mini` / `claude-sonnet-4-6` / ...). Reflects the writer
+            call only — the extractor reports separately when needed.

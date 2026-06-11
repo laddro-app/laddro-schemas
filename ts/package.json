@@ -1,6 +1,6 @@
 {
   "name": "@laddro-app/schemas",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Shared OpenAPI 3.1 schemas for Laddro APIs (resume, cover letter, tailor).",
   "license": "MIT",
   "type": "module",
