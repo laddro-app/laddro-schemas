@@ -6,6 +6,7 @@ package tailor
 import (
 	"encoding/json"
 	"errors"
+	"time"
 
 	"github.com/oapi-codegen/runtime"
 	openapi_types "github.com/oapi-codegen/runtime/types"
@@ -266,6 +267,153 @@ func (e SummaryTargetScope) Valid() bool {
 	}
 }
 
+// Defines values for TailorJobCreateRequestApprovalMode.
+const (
+	AutoApply         TailorJobCreateRequestApprovalMode = "autoApply"
+	ReviewSuggestions TailorJobCreateRequestApprovalMode = "reviewSuggestions"
+)
+
+// Valid indicates whether the value is a known member of the TailorJobCreateRequestApprovalMode enum.
+func (e TailorJobCreateRequestApprovalMode) Valid() bool {
+	switch e {
+	case AutoApply:
+		return true
+	case ReviewSuggestions:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for TailorJobCreateRequestLocale.
+const (
+	TailorJobCreateRequestLocaleDa TailorJobCreateRequestLocale = "da"
+	TailorJobCreateRequestLocaleDe TailorJobCreateRequestLocale = "de"
+	TailorJobCreateRequestLocaleEn TailorJobCreateRequestLocale = "en"
+	TailorJobCreateRequestLocaleEs TailorJobCreateRequestLocale = "es"
+	TailorJobCreateRequestLocaleEt TailorJobCreateRequestLocale = "et"
+	TailorJobCreateRequestLocaleFi TailorJobCreateRequestLocale = "fi"
+	TailorJobCreateRequestLocaleFr TailorJobCreateRequestLocale = "fr"
+	TailorJobCreateRequestLocaleIs TailorJobCreateRequestLocale = "is"
+	TailorJobCreateRequestLocaleIt TailorJobCreateRequestLocale = "it"
+	TailorJobCreateRequestLocaleNl TailorJobCreateRequestLocale = "nl"
+	TailorJobCreateRequestLocaleNo TailorJobCreateRequestLocale = "no"
+	TailorJobCreateRequestLocalePl TailorJobCreateRequestLocale = "pl"
+	TailorJobCreateRequestLocalePt TailorJobCreateRequestLocale = "pt"
+	TailorJobCreateRequestLocaleSv TailorJobCreateRequestLocale = "sv"
+)
+
+// Valid indicates whether the value is a known member of the TailorJobCreateRequestLocale enum.
+func (e TailorJobCreateRequestLocale) Valid() bool {
+	switch e {
+	case TailorJobCreateRequestLocaleDa:
+		return true
+	case TailorJobCreateRequestLocaleDe:
+		return true
+	case TailorJobCreateRequestLocaleEn:
+		return true
+	case TailorJobCreateRequestLocaleEs:
+		return true
+	case TailorJobCreateRequestLocaleEt:
+		return true
+	case TailorJobCreateRequestLocaleFi:
+		return true
+	case TailorJobCreateRequestLocaleFr:
+		return true
+	case TailorJobCreateRequestLocaleIs:
+		return true
+	case TailorJobCreateRequestLocaleIt:
+		return true
+	case TailorJobCreateRequestLocaleNl:
+		return true
+	case TailorJobCreateRequestLocaleNo:
+		return true
+	case TailorJobCreateRequestLocalePl:
+		return true
+	case TailorJobCreateRequestLocalePt:
+		return true
+	case TailorJobCreateRequestLocaleSv:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for TailorJobEventType.
+const (
+	TailorCancelled          TailorJobEventType = "tailor.cancelled"
+	TailorCompleted          TailorJobEventType = "tailor.completed"
+	TailorExtractJdDone      TailorJobEventType = "tailor.extract_jd.done"
+	TailorExtractProfileDone TailorJobEventType = "tailor.extract_profile.done"
+	TailorFailed             TailorJobEventType = "tailor.failed"
+	TailorFillProgress       TailorJobEventType = "tailor.fill.progress"
+	TailorMatchDone          TailorJobEventType = "tailor.match.done"
+	TailorPretrimDone        TailorJobEventType = "tailor.pretrim.done"
+	TailorRecommendDone      TailorJobEventType = "tailor.recommend.done"
+	TailorStarted            TailorJobEventType = "tailor.started"
+	TailorVerdictDone        TailorJobEventType = "tailor.verdict.done"
+)
+
+// Valid indicates whether the value is a known member of the TailorJobEventType enum.
+func (e TailorJobEventType) Valid() bool {
+	switch e {
+	case TailorCancelled:
+		return true
+	case TailorCompleted:
+		return true
+	case TailorExtractJdDone:
+		return true
+	case TailorExtractProfileDone:
+		return true
+	case TailorFailed:
+		return true
+	case TailorFillProgress:
+		return true
+	case TailorMatchDone:
+		return true
+	case TailorPretrimDone:
+		return true
+	case TailorRecommendDone:
+		return true
+	case TailorStarted:
+		return true
+	case TailorVerdictDone:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for TailorJobStatus.
+const (
+	TailorJobStatusCancelled TailorJobStatus = "cancelled"
+	TailorJobStatusCompleted TailorJobStatus = "completed"
+	TailorJobStatusFailed    TailorJobStatus = "failed"
+	TailorJobStatusNoFit     TailorJobStatus = "no_fit"
+	TailorJobStatusPending   TailorJobStatus = "pending"
+	TailorJobStatusRunning   TailorJobStatus = "running"
+)
+
+// Valid indicates whether the value is a known member of the TailorJobStatus enum.
+func (e TailorJobStatus) Valid() bool {
+	switch e {
+	case TailorJobStatusCancelled:
+		return true
+	case TailorJobStatusCompleted:
+		return true
+	case TailorJobStatusFailed:
+		return true
+	case TailorJobStatusNoFit:
+		return true
+	case TailorJobStatusPending:
+		return true
+	case TailorJobStatusRunning:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for TailorRequestLocale.
 const (
 	TailorRequestLocaleDa TailorRequestLocale = "da"
@@ -322,22 +470,22 @@ func (e TailorRequestLocale) Valid() bool {
 
 // Defines values for TailorResponseFitVerdict.
 const (
-	NoFit      TailorResponseFitVerdict = "no_fit"
-	PartialFit TailorResponseFitVerdict = "partial_fit"
-	StrongFit  TailorResponseFitVerdict = "strong_fit"
-	WeakFit    TailorResponseFitVerdict = "weak_fit"
+	TailorResponseFitVerdictNoFit      TailorResponseFitVerdict = "no_fit"
+	TailorResponseFitVerdictPartialFit TailorResponseFitVerdict = "partial_fit"
+	TailorResponseFitVerdictStrongFit  TailorResponseFitVerdict = "strong_fit"
+	TailorResponseFitVerdictWeakFit    TailorResponseFitVerdict = "weak_fit"
 )
 
 // Valid indicates whether the value is a known member of the TailorResponseFitVerdict enum.
 func (e TailorResponseFitVerdict) Valid() bool {
 	switch e {
-	case NoFit:
+	case TailorResponseFitVerdictNoFit:
 		return true
-	case PartialFit:
+	case TailorResponseFitVerdictPartialFit:
 		return true
-	case StrongFit:
+	case TailorResponseFitVerdictStrongFit:
 		return true
-	case WeakFit:
+	case TailorResponseFitVerdictWeakFit:
 		return true
 	default:
 		return false
@@ -346,52 +494,52 @@ func (e TailorResponseFitVerdict) Valid() bool {
 
 // Defines values for WorkerAnalyzeRequestLocale.
 const (
-	WorkerAnalyzeRequestLocaleDa WorkerAnalyzeRequestLocale = "da"
-	WorkerAnalyzeRequestLocaleDe WorkerAnalyzeRequestLocale = "de"
-	WorkerAnalyzeRequestLocaleEn WorkerAnalyzeRequestLocale = "en"
-	WorkerAnalyzeRequestLocaleEs WorkerAnalyzeRequestLocale = "es"
-	WorkerAnalyzeRequestLocaleEt WorkerAnalyzeRequestLocale = "et"
-	WorkerAnalyzeRequestLocaleFi WorkerAnalyzeRequestLocale = "fi"
-	WorkerAnalyzeRequestLocaleFr WorkerAnalyzeRequestLocale = "fr"
-	WorkerAnalyzeRequestLocaleIs WorkerAnalyzeRequestLocale = "is"
-	WorkerAnalyzeRequestLocaleIt WorkerAnalyzeRequestLocale = "it"
-	WorkerAnalyzeRequestLocaleNl WorkerAnalyzeRequestLocale = "nl"
-	WorkerAnalyzeRequestLocaleNo WorkerAnalyzeRequestLocale = "no"
-	WorkerAnalyzeRequestLocalePl WorkerAnalyzeRequestLocale = "pl"
-	WorkerAnalyzeRequestLocalePt WorkerAnalyzeRequestLocale = "pt"
-	WorkerAnalyzeRequestLocaleSv WorkerAnalyzeRequestLocale = "sv"
+	Da WorkerAnalyzeRequestLocale = "da"
+	De WorkerAnalyzeRequestLocale = "de"
+	En WorkerAnalyzeRequestLocale = "en"
+	Es WorkerAnalyzeRequestLocale = "es"
+	Et WorkerAnalyzeRequestLocale = "et"
+	Fi WorkerAnalyzeRequestLocale = "fi"
+	Fr WorkerAnalyzeRequestLocale = "fr"
+	Is WorkerAnalyzeRequestLocale = "is"
+	It WorkerAnalyzeRequestLocale = "it"
+	Nl WorkerAnalyzeRequestLocale = "nl"
+	No WorkerAnalyzeRequestLocale = "no"
+	Pl WorkerAnalyzeRequestLocale = "pl"
+	Pt WorkerAnalyzeRequestLocale = "pt"
+	Sv WorkerAnalyzeRequestLocale = "sv"
 )
 
 // Valid indicates whether the value is a known member of the WorkerAnalyzeRequestLocale enum.
 func (e WorkerAnalyzeRequestLocale) Valid() bool {
 	switch e {
-	case WorkerAnalyzeRequestLocaleDa:
+	case Da:
 		return true
-	case WorkerAnalyzeRequestLocaleDe:
+	case De:
 		return true
-	case WorkerAnalyzeRequestLocaleEn:
+	case En:
 		return true
-	case WorkerAnalyzeRequestLocaleEs:
+	case Es:
 		return true
-	case WorkerAnalyzeRequestLocaleEt:
+	case Et:
 		return true
-	case WorkerAnalyzeRequestLocaleFi:
+	case Fi:
 		return true
-	case WorkerAnalyzeRequestLocaleFr:
+	case Fr:
 		return true
-	case WorkerAnalyzeRequestLocaleIs:
+	case Is:
 		return true
-	case WorkerAnalyzeRequestLocaleIt:
+	case It:
 		return true
-	case WorkerAnalyzeRequestLocaleNl:
+	case Nl:
 		return true
-	case WorkerAnalyzeRequestLocaleNo:
+	case No:
 		return true
-	case WorkerAnalyzeRequestLocalePl:
+	case Pl:
 		return true
-	case WorkerAnalyzeRequestLocalePt:
+	case Pt:
 		return true
-	case WorkerAnalyzeRequestLocaleSv:
+	case Sv:
 		return true
 	default:
 		return false
@@ -746,6 +894,219 @@ type SummaryTarget struct {
 
 // SummaryTargetScope defines model for SummaryTarget.Scope.
 type SummaryTargetScope string
+
+// TailorJobCreateRequest Body of POST /ai/tailor-jobs. Replaces the synchronous
+// TailorRequest at the backend boundary. Backend creates a job
+// row, enqueues a runner, and returns the snapshot in status
+// `pending` immediately — the client never waits for ai-core.
+type TailorJobCreateRequest struct {
+	// ApprovalMode Backwards-compatible passthrough from the existing sync
+	// contract. Default is `reviewSuggestions`.
+	ApprovalMode *TailorJobCreateRequestApprovalMode `json:"approval_mode,omitempty"`
+
+	// Company Optional. Stored on the sibling resume metadata when the
+	// job completes. Not sent to ai-core.
+	Company        *string                      `json:"company,omitempty"`
+	JobDescription string                       `json:"job_description"`
+	Locale         TailorJobCreateRequestLocale `json:"locale"`
+
+	// Position Optional. Stored on the sibling resume metadata.
+	Position *string `json:"position,omitempty"`
+
+	// Resume Resume DTO — same shape as TailorRequest.resume. See the
+	// cross-file note on resume typing.
+	Resume map[string]interface{} `json:"resume"`
+
+	// TailorUuid The frontend's stable draft id (also the URL path param on
+	// /tailor-resume/[id]). Used to find the most-recent job on
+	// page refresh.
+	TailorUuid openapi_types.UUID `json:"tailor_uuid"`
+}
+
+// TailorJobCreateRequestApprovalMode Backwards-compatible passthrough from the existing sync
+// contract. Default is `reviewSuggestions`.
+type TailorJobCreateRequestApprovalMode string
+
+// TailorJobCreateRequestLocale defines model for TailorJobCreateRequest.Locale.
+type TailorJobCreateRequestLocale string
+
+// TailorJobEvent Append-only event emitted by ai-core during a tailor run.
+// Persisted via UNIQUE (job_id, sequence) so duplicate POSTs (from
+// ai-core retries or webhook redelivery) are idempotent no-ops.
+// Sequence numbers are monotonic per job; reconnecting SSE clients
+// pass the last seen sequence in `Last-Event-ID` and the server
+// replays from there.
+type TailorJobEvent struct {
+	// EventType Closed set of event types ai-core emits. The frontend's progress
+	// timeline renders one step per non-`fill.progress` event;
+	// `tailor.fill.progress` is the only multi-event step (one event
+	// per parallel filler completing a card).
+	EventType TailorJobEventType `json:"event_type"`
+
+	// JobId The TailorJob this event belongs to.
+	JobId openapi_types.UUID `json:"job_id"`
+
+	// OccurredAt ai-core's wall-clock at emit time. The backend also stamps
+	// its own `ingested_at` for lag observability.
+	OccurredAt time.Time `json:"occurred_at"`
+
+	// Payload Step-specific payload. Shapes by event_type:
+	//
+	// - tailor.started
+	//     { jd_length_chars: int, resume_version: string,
+	//       locale: string }
+	// - tailor.pretrim.done
+	//     { trimmed: bool, before_chars: int, after_chars: int }
+	// - tailor.extract_jd.done
+	//     { archetype: string, title: string,
+	//       required_skill_count: int, nice_count: int }
+	// - tailor.extract_profile.done
+	//     { archetype: string, years_experience: int,
+	//       primary_stack_count: int, secondary_stack_count: int }
+	// - tailor.match.done
+	//     { matched_required: int, missing_required: int,
+	//       hidden_skills_count: int }
+	// - tailor.recommend.done
+	//     { card_count: int,
+	//       by_kind: { summary: int, skill: int, bullet: int } }
+	// - tailor.fill.progress
+	//     { card_id: string, kind: string, success: bool,
+	//       error?: string }
+	// - tailor.verdict.done
+	//     { verdict: string, score: int, reason?: string }
+	// - tailor.completed
+	//     { result_summary: object, total_llm_calls: int,
+	//       total_tokens: int, cost_usd: number,
+	//       duration_ms: int }
+	// - tailor.failed
+	//     { failed_at_step: string, error_class: string,
+	//       error_message: string, retryable: bool }
+	// - tailor.cancelled
+	//     { cancelled_at_step: string,
+	//       reason: string }   # e.g. "user_requested"
+	//
+	// Consumers MUST NOT regex on the payload. Each shape is
+	// switched on `event_type`, fields are read by name.
+	Payload map[string]interface{} `json:"payload"`
+
+	// Sequence Monotonic per-job sequence number. The first event a job
+	// ever emits is sequence=1. If ai-core crashes mid-run and a
+	// retry resumes the pipeline, sequence continues from the
+	// backend's stored `last_event_seq + 1` — it never resets.
+	Sequence int `json:"sequence"`
+}
+
+// TailorJobEventType Closed set of event types ai-core emits. The frontend's progress
+// timeline renders one step per non-`fill.progress` event;
+// `tailor.fill.progress` is the only multi-event step (one event
+// per parallel filler completing a card).
+type TailorJobEventType string
+
+// TailorJobOverrideRequest Body of POST /ai/tailor-jobs/:id/override. Empty payload by
+// design — the backend already has the source job_id, the
+// tailor_uuid, the resume, and the JD. The override flag is a
+// server-side trip so we always have the audit trail of "user
+// was told no_fit, then chose to override."
+type TailorJobOverrideRequest struct {
+	// AcknowledgeNoFit Must be true. The frontend sets it as the user clicks the
+	// "tailor anyway" button. Defends against accidental retries
+	// that look like overrides.
+	AcknowledgeNoFit *bool `json:"acknowledge_no_fit,omitempty"`
+}
+
+// TailorJobSnapshot Canonical durable view of a job. Returned by:
+//   - GET /ai/tailor-jobs/:id
+//   - GET /ai/tailor-jobs/by-uuid/:tailor_uuid
+//
+// and as the initial frame on the SSE stream before live events
+// start flowing. The frontend reconstructs UI state by replaying
+// `events` in sequence order, then subscribing for new ones.
+type TailorJobSnapshot struct {
+	// CompletedAt When the job reached a terminal status (completed | no_fit |
+	// failed | cancelled). Null until then.
+	CompletedAt *time.Time `json:"completed_at,omitempty"`
+	CreatedAt   time.Time  `json:"created_at"`
+
+	// Events All persisted events for this job, in ascending sequence
+	// order. On initial GET this is the full history; on the SSE
+	// stream this is the catch-up replay before live events.
+	Events []TailorJobEvent `json:"events"`
+
+	// FailReason Present when status is `failed`. Machine + human halves so
+	// the frontend can render verbatim AND branch UX on the class.
+	FailReason *struct {
+		// ErrorClass Closed set, e.g. ai_core_unreachable, llm_timeout,
+		// invalid_ai_response, validator_rejected, internal_error.
+		ErrorClass *string `json:"error_class,omitempty"`
+
+		// ErrorMessage Locale-aware message the user is shown.
+		ErrorMessage *string `json:"error_message,omitempty"`
+
+		// Retryable Whether the frontend should surface a "retry" button.
+		// False for hard failures (invalid_ai_response after
+		// exhausted retries).
+		Retryable *bool `json:"retryable,omitempty"`
+	} `json:"fail_reason,omitempty"`
+	JobId openapi_types.UUID `json:"job_id"`
+
+	// LastEventSeq Highest sequence the backend has persisted for this job.
+	// SSE clients reconnecting pass this as `Last-Event-ID`.
+	LastEventSeq int `json:"last_event_seq"`
+
+	// ParentJobId Set when this job is an override of a previous no_fit job
+	// (POST /ai/tailor-jobs/:id/override). Lets us audit
+	// "user was told no_fit, then chose to tailor anyway".
+	ParentJobId *openapi_types.UUID `json:"parent_job_id,omitempty"`
+
+	// Result Present when status is `completed` or `no_fit`. Cached so
+	// revisits never re-run the pipeline — the page just renders
+	// from this snapshot.
+	Result *TailorResponse `json:"result,omitempty"`
+
+	// RetryCount How many times the orphan sweeper has re-enqueued this job.
+	// Hard ceiling at 3 — beyond that the job is marked failed.
+	RetryCount *int `json:"retry_count,omitempty"`
+
+	// StartedAt When the runner first transitioned status to running.
+	StartedAt *time.Time `json:"started_at,omitempty"`
+
+	// Status State machine for a tailor job.
+	//
+	// - `pending`    Row created, runner not yet picked it up.
+	// - `running`    Runner started, ai-core executing.
+	// - `completed`  Terminal. result_json populated, fit_verdict in
+	//                {strong_fit, partial_fit, weak_fit}.
+	// - `no_fit`     Terminal but distinct from `completed` because
+	//                suggestions[] is empty by construction. UI shows
+	//                the no-fit reason + offers an explicit override.
+	// - `failed`     Terminal after exhausting retries. fail_reason
+	//                carries an error_class + locale-aware message.
+	// - `cancelled`  User-initiated abort. ai-core honors via
+	//                ctx.Done() at the next step boundary.
+	Status TailorJobStatus `json:"status"`
+
+	// TailorUuid The tailor draft / sibling resume slot this job belongs to.
+	// Stable across retries and override jobs — the frontend
+	// queries by tailor_uuid on page mount, regardless of how many
+	// job_ids a user has accumulated for the same target.
+	TailorUuid openapi_types.UUID `json:"tailor_uuid"`
+	UpdatedAt  time.Time          `json:"updated_at"`
+}
+
+// TailorJobStatus State machine for a tailor job.
+//
+//   - `pending`    Row created, runner not yet picked it up.
+//   - `running`    Runner started, ai-core executing.
+//   - `completed`  Terminal. result_json populated, fit_verdict in
+//     {strong_fit, partial_fit, weak_fit}.
+//   - `no_fit`     Terminal but distinct from `completed` because
+//     suggestions[] is empty by construction. UI shows
+//     the no-fit reason + offers an explicit override.
+//   - `failed`     Terminal after exhausting retries. fail_reason
+//     carries an error_class + locale-aware message.
+//   - `cancelled`  User-initiated abort. ai-core honors via
+//     ctx.Done() at the next step boundary.
+type TailorJobStatus string
 
 // TailorRequest defines model for TailorRequest.
 type TailorRequest struct {

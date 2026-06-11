@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Laddro Tailor Schema
-  version: 2.0.0
+  version: 2.1.0
   description: |
     Canonical contract for the honest-tailor pipeline. Single source of truth
     consumed by:
@@ -49,6 +49,24 @@ info:
     worker at extraction time and scoped to a single TailorResponse (not
     stable across calls). Fixtures and Pydantic models updated; ai-core
     + frontend consume the bumped types from @laddro-app/schemas@0.5.0.
+
+    2.1.0 (2026-06-10): Adds the async-job event protocol so tailor can
+    survive page refresh, browser-close, ai-core pod crash, and OpenAI
+    rate-limit storms. New types:
+      - TailorJobStatus    state enum (pending | running | completed |
+                           no_fit | failed | cancelled)
+      - TailorJobEvent     append-only event record with monotonic
+                           sequence per job; emitted by ai-core at each
+                           pipeline-step boundary; idempotent via
+                           UNIQUE(job_id, sequence) at persistence.
+      - TailorJobSnapshot  durable view of a job assembled from rows
+                           in tailor_jobs + tailor_job_events. Returned
+                           by GET /ai/tailor-jobs/:id and used by the
+                           SSE catch-up replay.
+    Backwards-compatible — TailorRequest / TailorResponse unchanged.
+    Frontend may opt into the new async surface; the sync /v1/tailor
+    endpoint stays callable until cutover. Consumers bump to
+    @laddro-app/schemas@0.6.0.
 
 components:
   schemas:
@@ -535,5 +553,286 @@ components:
           description: |
             Writer LLM output, in the requested locale. Single bullet, no
             headers, no preamble. Strictly grounded in `evidence`.
+
+    # ─────────────────────────────────────────────────────────────
+    #  Async job protocol (2.1.0+)
+    #
+    #  The tailor pipeline is a long-running operation (10-30 s today,
+    #  could grow). Users will navigate away mid-run, refresh, or close
+    #  the browser. The async protocol gives us:
+    #    - submit-once durability (job lives in the DB)
+    #    - real-time progress (events streamed via SSE)
+    #    - resume-on-mount (frontend re-fetches by tailor_uuid)
+    #    - replay safety (UNIQUE (job_id, sequence) at the event store)
+    #
+    #  ai-core stays stateless. ai-core emits TailorJobEvent rows to the
+    #  backend webhook at each pipeline-step boundary. Backend persists
+    #  events + reflects them onto the canonical TailorJobSnapshot that
+    #  the frontend reads on mount and subscribes to via SSE.
+    # ─────────────────────────────────────────────────────────────
+
+    TailorJobStatus:
+      type: string
+      enum: [pending, running, completed, no_fit, failed, cancelled]
+      description: |
+        State machine for a tailor job.
+
+        - `pending`    Row created, runner not yet picked it up.
+        - `running`    Runner started, ai-core executing.
+        - `completed`  Terminal. result_json populated, fit_verdict in
+                       {strong_fit, partial_fit, weak_fit}.
+        - `no_fit`     Terminal but distinct from `completed` because
+                       suggestions[] is empty by construction. UI shows
+                       the no-fit reason + offers an explicit override.
+        - `failed`     Terminal after exhausting retries. fail_reason
+                       carries an error_class + locale-aware message.
+        - `cancelled`  User-initiated abort. ai-core honors via
+                       ctx.Done() at the next step boundary.
+
+    TailorJobEventType:
+      type: string
+      enum:
+        - tailor.started
+        - tailor.pretrim.done
+        - tailor.extract_jd.done
+        - tailor.extract_profile.done
+        - tailor.match.done
+        - tailor.recommend.done
+        - tailor.fill.progress
+        - tailor.verdict.done
+        - tailor.completed
+        - tailor.failed
+        - tailor.cancelled
+      description: |
+        Closed set of event types ai-core emits. The frontend's progress
+        timeline renders one step per non-`fill.progress` event;
+        `tailor.fill.progress` is the only multi-event step (one event
+        per parallel filler completing a card).
+
+    TailorJobEvent:
+      type: object
+      required: [job_id, sequence, event_type, occurred_at, payload]
+      description: |
+        Append-only event emitted by ai-core during a tailor run.
+        Persisted via UNIQUE (job_id, sequence) so duplicate POSTs (from
+        ai-core retries or webhook redelivery) are idempotent no-ops.
+        Sequence numbers are monotonic per job; reconnecting SSE clients
+        pass the last seen sequence in `Last-Event-ID` and the server
+        replays from there.
+      properties:
+        job_id:
+          type: string
+          format: uuid
+          description: The TailorJob this event belongs to.
+        sequence:
+          type: integer
+          minimum: 1
+          description: |
+            Monotonic per-job sequence number. The first event a job
+            ever emits is sequence=1. If ai-core crashes mid-run and a
+            retry resumes the pipeline, sequence continues from the
+            backend's stored `last_event_seq + 1` — it never resets.
+        event_type:
+          $ref: '#/components/schemas/TailorJobEventType'
+        occurred_at:
+          type: string
+          format: date-time
+          description: |
+            ai-core's wall-clock at emit time. The backend also stamps
+            its own `ingested_at` for lag observability.
+        payload:
+          type: object
+          additionalProperties: true
+          description: |
+            Step-specific payload. Shapes by event_type:
+
+            - tailor.started
+                { jd_length_chars: int, resume_version: string,
+                  locale: string }
+            - tailor.pretrim.done
+                { trimmed: bool, before_chars: int, after_chars: int }
+            - tailor.extract_jd.done
+                { archetype: string, title: string,
+                  required_skill_count: int, nice_count: int }
+            - tailor.extract_profile.done
+                { archetype: string, years_experience: int,
+                  primary_stack_count: int, secondary_stack_count: int }
+            - tailor.match.done
+                { matched_required: int, missing_required: int,
+                  hidden_skills_count: int }
+            - tailor.recommend.done
+                { card_count: int,
+                  by_kind: { summary: int, skill: int, bullet: int } }
+            - tailor.fill.progress
+                { card_id: string, kind: string, success: bool,
+                  error?: string }
+            - tailor.verdict.done
+                { verdict: string, score: int, reason?: string }
+            - tailor.completed
+                { result_summary: object, total_llm_calls: int,
+                  total_tokens: int, cost_usd: number,
+                  duration_ms: int }
+            - tailor.failed
+                { failed_at_step: string, error_class: string,
+                  error_message: string, retryable: bool }
+            - tailor.cancelled
+                { cancelled_at_step: string,
+                  reason: string }   # e.g. "user_requested"
+
+            Consumers MUST NOT regex on the payload. Each shape is
+            switched on `event_type`, fields are read by name.
+
+    TailorJobSnapshot:
+      type: object
+      required: [job_id, tailor_uuid, status, created_at, updated_at, last_event_seq, events]
+      description: |
+        Canonical durable view of a job. Returned by:
+          - GET /ai/tailor-jobs/:id
+          - GET /ai/tailor-jobs/by-uuid/:tailor_uuid
+        and as the initial frame on the SSE stream before live events
+        start flowing. The frontend reconstructs UI state by replaying
+        `events` in sequence order, then subscribing for new ones.
+      properties:
+        job_id:
+          type: string
+          format: uuid
+        tailor_uuid:
+          type: string
+          format: uuid
+          description: |
+            The tailor draft / sibling resume slot this job belongs to.
+            Stable across retries and override jobs — the frontend
+            queries by tailor_uuid on page mount, regardless of how many
+            job_ids a user has accumulated for the same target.
+        parent_job_id:
+          type: string
+          format: uuid
+          description: |
+            Set when this job is an override of a previous no_fit job
+            (POST /ai/tailor-jobs/:id/override). Lets us audit
+            "user was told no_fit, then chose to tailor anyway".
+        status:
+          $ref: '#/components/schemas/TailorJobStatus'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        started_at:
+          type: string
+          format: date-time
+          description: When the runner first transitioned status to running.
+        completed_at:
+          type: string
+          format: date-time
+          description: |
+            When the job reached a terminal status (completed | no_fit |
+            failed | cancelled). Null until then.
+        last_event_seq:
+          type: integer
+          minimum: 0
+          description: |
+            Highest sequence the backend has persisted for this job.
+            SSE clients reconnecting pass this as `Last-Event-ID`.
+        retry_count:
+          type: integer
+          minimum: 0
+          description: |
+            How many times the orphan sweeper has re-enqueued this job.
+            Hard ceiling at 3 — beyond that the job is marked failed.
+        events:
+          type: array
+          description: |
+            All persisted events for this job, in ascending sequence
+            order. On initial GET this is the full history; on the SSE
+            stream this is the catch-up replay before live events.
+          items:
+            $ref: '#/components/schemas/TailorJobEvent'
+        result:
+          allOf:
+            - $ref: '#/components/schemas/TailorResponse'
+          description: |
+            Present when status is `completed` or `no_fit`. Cached so
+            revisits never re-run the pipeline — the page just renders
+            from this snapshot.
+        fail_reason:
+          type: object
+          description: |
+            Present when status is `failed`. Machine + human halves so
+            the frontend can render verbatim AND branch UX on the class.
+          properties:
+            error_class:
+              type: string
+              description: |
+                Closed set, e.g. ai_core_unreachable, llm_timeout,
+                invalid_ai_response, validator_rejected, internal_error.
+            error_message:
+              type: string
+              description: Locale-aware message the user is shown.
+            retryable:
+              type: boolean
+              description: |
+                Whether the frontend should surface a "retry" button.
+                False for hard failures (invalid_ai_response after
+                exhausted retries).
+
+    TailorJobCreateRequest:
+      type: object
+      required: [tailor_uuid, resume, job_description, locale]
+      description: |
+        Body of POST /ai/tailor-jobs. Replaces the synchronous
+        TailorRequest at the backend boundary. Backend creates a job
+        row, enqueues a runner, and returns the snapshot in status
+        `pending` immediately — the client never waits for ai-core.
+      properties:
+        tailor_uuid:
+          type: string
+          format: uuid
+          description: |
+            The frontend's stable draft id (also the URL path param on
+            /tailor-resume/[id]). Used to find the most-recent job on
+            page refresh.
+        resume:
+          type: object
+          description: |
+            Resume DTO — same shape as TailorRequest.resume. See the
+            cross-file note on resume typing.
+        job_description:
+          type: string
+          minLength: 1
+        locale:
+          type: string
+          enum: [en, de, es, fr, it, nl, pl, pt, is, fi, sv, no, da, et]
+        company:
+          type: string
+          description: |
+            Optional. Stored on the sibling resume metadata when the
+            job completes. Not sent to ai-core.
+        position:
+          type: string
+          description: Optional. Stored on the sibling resume metadata.
+        approval_mode:
+          type: string
+          enum: [autoApply, reviewSuggestions]
+          description: |
+            Backwards-compatible passthrough from the existing sync
+            contract. Default is `reviewSuggestions`.
+
+    TailorJobOverrideRequest:
+      type: object
+      description: |
+        Body of POST /ai/tailor-jobs/:id/override. Empty payload by
+        design — the backend already has the source job_id, the
+        tailor_uuid, the resume, and the JD. The override flag is a
+        server-side trip so we always have the audit trail of "user
+        was told no_fit, then chose to override."
+      properties:
+        acknowledge_no_fit:
+          type: boolean
+          description: |
+            Must be true. The frontend sets it as the user clicks the
+            "tailor anyway" button. Defends against accidental retries
+            that look like overrides.
 
 paths: {}
