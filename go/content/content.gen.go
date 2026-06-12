@@ -187,12 +187,25 @@ type ContentGenerationUsage struct {
 // ContentImproveRequest Request body for `POST /v1/content/improve` on laddro-ai-core (and the
 // matching `POST /api/content/improve` on laddro-backend, which forwards
 // the same envelope after loading the resume + crowdsource slice).
+//
+// The contract is intentionally narrow: backend has the DB and the user
+// session, so it knows the role / company / other bullets / top skills
+// of the item the user is editing. Shipping them directly keeps the
+// ai-core surface stateless and the LLM brief honest — every field here
+// lands in the prompt, nothing else does. The full resume is never
+// sent to ai-core for improve (it would just inflate the request and
+// risk Gemini drifting into unrelated sections).
 type ContentImproveRequest struct {
 	// BucketId Cached bucket id from a previous skills-suggest response on the
 	// same resume. When present, ai-core skips classifying. When absent,
 	// ai-core classifies the bullet via the same nearest-centroid pass
 	// and returns the chosen bucket in `bucketId` of the response.
 	BucketId *string `json:"bucketId,omitempty"`
+
+	// Company Employer name from the employment item. Used in the prompt for
+	// anchoring; never echoed into the rewrite unless the original text
+	// already mentions it.
+	Company string `json:"company"`
 
 	// CrowdsourceImprovements Top accepted improvement candidates for this
 	// `(bucketId, weaknessPattern, locale)` slice, ranked by
@@ -203,22 +216,29 @@ type ContentImproveRequest struct {
 	// output with `source: cache` and zero LLM cost.
 	CrowdsourceImprovements *[]CrowdsourcedImprovement `json:"crowdsourceImprovements,omitempty"`
 
-	// EmploymentItemId Which employment item the `text` belongs to. ai-core uses this to
-	// pull `position` (role), `company`, and the same item's other
-	// bullets (max 3) for non-repetition signal in the brief.
-	EmploymentItemId string `json:"employmentItemId"`
+	// ExistingSkills Up to 5 skill names from the candidate's resume. Used to anchor
+	// Gemini's stack choice — "preserve {existingSkills}; don't swap for
+	// adjacent tech." Without this anchor the model will happily swap
+	// Postgres for MySQL or React for Vue. Backend caps at 5.
+	ExistingSkills *[]string `json:"existingSkills,omitempty"`
 
 	// Locale Drives prompt language for Gemini and which slice of
 	// `improve_selections` is consulted for the cache hit. No English
 	// fallback — if the user's bullet is German, the rewrite is German.
 	Locale ContentImproveRequestLocale `json:"locale"`
 
-	// Resume The candidate's V1 Resume. ai-core reads `personal.role`, the
-	// employment item referenced by `employmentItemId`, and
-	// `resume.skills` to assemble the minimal brief. Nothing else from
-	// the resume is sent to the LLM — sections, dates, education,
-	// projects, references, and other employments are not in the brief.
-	Resume map[string]interface{} `json:"resume"`
+	// OtherBullets Up to 3 other description bullets from the same employment item,
+	// excluding the one being improved. Used as a non-repetition signal
+	// in the prompt so Gemini doesn't propose a rewrite that duplicates
+	// another bullet on the same role. Backend caps at 3 — sending more
+	// inflates the brief without changing model behaviour.
+	OtherBullets *[]string `json:"otherBullets,omitempty"`
+
+	// Role Position title from the employment item the bullet belongs to.
+	// E.g. "Senior Backend Engineer". Used in the prompt to anchor the
+	// rewrite ("for {role} at {company}") and as a signal to the
+	// seniority detector when bucketId is absent.
+	Role string `json:"role"`
 
 	// Text The current bullet text the user wants to improve. Passed verbatim
 	// to the local scorer and (if the input gate passes) into the Gemini
