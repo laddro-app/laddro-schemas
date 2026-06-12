@@ -13,6 +13,7 @@ declare -a SPECS=(
   "cover-letter/cover-letter.v1.yaml:cover-letter.gen.ts"
   "tailor/tailor.v1.yaml:tailor.gen.ts"
   "skills/skills.v1.yaml:skills.gen.ts"
+  "content/content.v1.yaml:content.gen.ts"
 )
 
 for entry in "${SPECS[@]}"; do

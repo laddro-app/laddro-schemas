@@ -1,0 +1,236 @@
+openapi: 3.1.0
+info:
+  title: Laddro Content Improvement Schema
+  version: 1.0.0
+  description: |
+    Canonical request/response types for the content-improve pipeline.
+    Consumed by laddro-web-app, laddro-backend, and laddro-ai-core.
+
+    Architecture summary (see obsidian/laddro/plans/content-improve-end-to-end.md
+    for the full design):
+
+    - ai-core owns the smarts: builds a ~150-token brief from the resume locally
+      (the LLM never sees the full resume), runs the input through a no-regex
+      local scorer (e5 centroids + GLiNER entities), and only calls Gemini
+      Flash 2.5 when the input has fixable weaknesses AND no crowdsource cache
+      hit covers the same (bucket, weakness pattern, input fingerprint) slice.
+    - Two output gates: the same scorer is re-run on Gemini's output (reject if
+      it didn't improve the score) and a tiny verifier prompt checks that no
+      numbers / percentages / quantities were fabricated.
+    - Backend owns the crowdsource counter (`improve_selections`) and ships the
+      top accepted outputs in the request envelope. ai-core stays stateless wrt
+      that table — same split as skills-suggest.
+    - Never fabricates numbers: any quantity missing from the original surfaces
+      as a `[METRIC]` / `[X%]` / `[NUMBER]` / `[TEAM_SIZE]` / `[FEATURE]`
+      placeholder in the output for the user to fill honestly.
+
+components:
+  schemas:
+    ContentImproveRequest:
+      type: object
+      required: [resume, employmentItemId, text, locale]
+      description: |
+        Request body for `POST /v1/content/improve` on laddro-ai-core (and the
+        matching `POST /api/content/improve` on laddro-backend, which forwards
+        the same envelope after loading the resume + crowdsource slice).
+      properties:
+        resume:
+          type: object
+          description: |
+            The candidate's V1 Resume. ai-core reads `personal.role`, the
+            employment item referenced by `employmentItemId`, and
+            `resume.skills` to assemble the minimal brief. Nothing else from
+            the resume is sent to the LLM — sections, dates, education,
+            projects, references, and other employments are not in the brief.
+        employmentItemId:
+          type: string
+          description: |
+            Which employment item the `text` belongs to. ai-core uses this to
+            pull `position` (role), `company`, and the same item's other
+            bullets (max 3) for non-repetition signal in the brief.
+        text:
+          type: string
+          minLength: 1
+          description: |
+            The current bullet text the user wants to improve. Passed verbatim
+            to the local scorer and (if the input gate passes) into the Gemini
+            prompt as `Original:`.
+        locale:
+          type: string
+          enum: [en, de, es, fr, it, nl, pl, pt, is, fi, sv, no, da, et]
+          description: |
+            Drives prompt language for Gemini and which slice of
+            `improve_selections` is consulted for the cache hit. No English
+            fallback — if the user's bullet is German, the rewrite is German.
+        bucketId:
+          type: string
+          description: |
+            Cached bucket id from a previous skills-suggest response on the
+            same resume. When present, ai-core skips classifying. When absent,
+            ai-core classifies the bullet via the same nearest-centroid pass
+            and returns the chosen bucket in `bucketId` of the response.
+        crowdsourceImprovements:
+          type: array
+          description: |
+            Top accepted improvement candidates for this
+            `(bucketId, weaknessPattern, locale)` slice, ranked by
+            `accepts - rejects`. Backend reads `improve_selections` and ships
+            the top ~10 per slice. ai-core checks if any candidate's
+            `inputPatternHash` matches the current input's shingled fingerprint
+            (k=3, MinHash, similarity >= 0.8); on hit it returns the candidate
+            output with `source: cache` and zero LLM cost.
+          items:
+            $ref: '#/components/schemas/CrowdsourcedImprovement'
+
+    CrowdsourcedImprovement:
+      type: object
+      required: [inputPatternHash, outputText, accepts, rejects]
+      properties:
+        inputPatternHash:
+          type: string
+          description: |
+            MinHash fingerprint of the original input text (k=3 shingles).
+            ai-core compares the current input's fingerprint against this and
+            promotes a cache hit when Jaccard estimate >= 0.8.
+        outputText:
+          type: string
+          description: The accepted rewrite to serve on a hit.
+        accepts:
+          type: integer
+          minimum: 0
+        rejects:
+          type: integer
+          minimum: 0
+
+    ContentImproveResponse:
+      type: object
+      required: [source, weaknesses, usage]
+      description: |
+        Result of a `POST /v1/content/improve` call. `text` is omitted on the
+        no-change-needed / rejected paths so the frontend can render the
+        right state without a sentinel string. `source` always reports which
+        path produced the response, for observability.
+      properties:
+        text:
+          type: string
+          description: |
+            The rewritten bullet. Present only when `source` is `gemini` or
+            `cache`. Omitted (null) on `no_change_needed`, `rejected_scorer`,
+            `rejected_verifier`, and `too_short`.
+        source:
+          $ref: '#/components/schemas/ContentImproveSource'
+        bucketId:
+          type: string
+          description: |
+            Bucket id ai-core used — either passed in by the caller (verbatim)
+            or classified locally when the request omitted it. Backend
+            persists this on the content_improvements row.
+        weaknesses:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentWeakness'
+          description: |
+            What the local scorer flagged on the input — surfaced even when
+            the LLM call is skipped so the frontend can show a "looks good"
+            or "too short to improve" message with detail.
+        score:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: |
+            Composite 0–100 score the local scorer assigned to the INPUT.
+            Useful for the visibility gate on the ✨ button (frontend hides
+            the button when score >= 85).
+        usage:
+          $ref: '#/components/schemas/ContentGenerationUsage'
+
+    ContentImproveSource:
+      type: string
+      enum:
+        - no_change_needed
+        - too_short
+        - cache
+        - gemini
+        - rejected_scorer
+        - rejected_verifier
+      description: |
+        Which path produced this response.
+        - `no_change_needed` — input scored >= 85, no LLM call, no rewrite.
+        - `too_short` — input under 5 tokens, refused. Improve and write-for-me
+          are conceptually different; we don't silently switch lanes.
+        - `cache` — a `crowdsourceImprovements` candidate matched the input
+          fingerprint above the Jaccard threshold; that candidate is returned.
+          Zero LLM cost.
+        - `gemini` — input had fixable weaknesses, cache miss, Gemini Flash 2.5
+          produced a rewrite that passed BOTH the scorer gate (new score >
+          old score) AND the verifier gate (no fabricated numbers).
+        - `rejected_scorer` — Gemini's rewrite did not improve the score.
+          Returned with `text` omitted; frontend leaves the user's draft.
+        - `rejected_verifier` — Gemini's rewrite contained a number,
+          percentage, or quantity not in the original. Hard reject.
+
+    ContentWeakness:
+      type: string
+      enum:
+        - weak_verb
+        - no_metric
+        - first_person
+        - vague_filler
+        - no_outcome
+        - too_short
+        - too_long
+      description: |
+        Classes of weakness the local scorer detects. All detected without
+        regex or keyword lists — `weak_verb` / `vague_filler` use cosine
+        against pre-computed centroids; `no_metric` / `first_person` /
+        `no_outcome` use GLiNER entity extraction; `too_short` / `too_long`
+        are structural token counts (not extraction).
+
+    ContentScoreRequest:
+      type: object
+      required: [text, locale]
+      description: |
+        Lightweight request for the local scorer alone — used by the frontend
+        to decide whether to render the ✨ button on a bullet (debounce ~800ms).
+        Same scorer as the improve flow, exposed as its own endpoint so the
+        button visibility check doesn't pay for the brief assembly.
+      properties:
+        text:
+          type: string
+          minLength: 1
+        locale:
+          type: string
+          enum: [en, de, es, fr, it, nl, pl, pt, is, fi, sv, no, da, et]
+
+    ContentScoreResponse:
+      type: object
+      required: [score, weaknesses]
+      properties:
+        score:
+          type: integer
+          minimum: 0
+          maximum: 100
+        weaknesses:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentWeakness'
+
+    ContentGenerationUsage:
+      type: object
+      required: [model]
+      description: |
+        Per-call usage block. On `cache` / `no_change_needed` / `too_short`,
+        token counts are zero and `model` is the empty string. On the Gemini
+        path, counts include BOTH the rewrite call and the verifier call so
+        downstream cost accounting is honest.
+      properties:
+        promptTokens:
+          type: integer
+          minimum: 0
+          default: 0
+        outputTokens:
+          type: integer
+          minimum: 0
+          default: 0
+        model:
+          type: string
