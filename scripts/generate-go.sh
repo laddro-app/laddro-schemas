@@ -9,6 +9,7 @@ declare -a SPECS=(
   "resume/resume.v1.yaml:go/resume"
   "cover-letter/cover-letter.v1.yaml:go/coverletter"
   "tailor/tailor.v1.yaml:go/tailor"
+  "skills/skills.v1.yaml:go/skills"
 )
 
 for entry in "${SPECS[@]}"; do
