@@ -1,0 +1,175 @@
+openapi: 3.1.0
+info:
+  title: Laddro Skills Suggestion Schema
+  version: 1.0.0
+  description: |
+    Canonical request/response types for the skills suggestion pipeline.
+    Consumed by laddro-web-app, laddro-backend, and laddro-ai-core.
+
+    Architecture summary (see obsidian/laddro/plans/skills-suggest-end-to-end.md
+    for the full design):
+
+    - ai-core owns the smarts: a sentence-transformer embedding bank over a
+      curated bucket taxonomy + ESCO union. Profile vector is built from the
+      candidate's recent role + industry hint + latest employment description +
+      existing skills, then cosine-matched against the bank.
+    - Matches are re-ranked by a crowdsource boost driven by `skill_selections`
+      (every user pick increments a per-(bucket, skill, locale) counter).
+    - LLM fallback fires only when the embedding pool produces fewer than the
+      requested limit (rare cold/niche path); LLM output is added to the bank
+      so the next similar request hits the deterministic path.
+    - First paint on /build-resume reads pre-computed suggestions inlined in
+      the resume payload — zero API calls, zero LLM tokens on return visits.
+
+    The request/response shapes here are intentionally minimal: the chip UI
+    only shows skill names, so no reason text is returned.
+
+components:
+  schemas:
+    SkillsSuggestRequest:
+      type: object
+      required: [resume, locale, existingSkills, exclude, limit]
+      description: |
+        Request body for `POST /v1/skills/suggest` on laddro-ai-core (and the
+        matching `POST /api/skills/suggest` on laddro-backend, which forwards
+        the same envelope after persisting the pick side-effect).
+      properties:
+        resume:
+          type: object
+          description: |
+            The candidate's V1 Resume. The classifier reads `personal.role`,
+            recent `employments[*].position`, and the latest employment
+            description to build the bucket id and profile vector. The
+            employer domain (when present) seeds the industry hint.
+        jobDescription:
+          type: string
+          description: |
+            Optional. When the user is in a tailor flow we pass the JD so the
+            profile vector skews toward the role they're targeting rather than
+            their resume baseline. Omitted on the standalone build-resume page.
+        locale:
+          type: string
+          enum: [en, de, es, fr, it, nl, pl, pt, is, fi, sv, no, da, et]
+          description: |
+            Drives which locale-labelled skill names ai-core returns AND which
+            slice of `skill_selections` (bucket_id, skill, locale) drives the
+            crowdsource boost. No English fallback labels — if a skill has no
+            label in this locale we surface the next best skill that does.
+        existingSkills:
+          type: array
+          items: { type: string }
+          description: |
+            Skills already on the resume. Filtered out of the candidate pool
+            and also concatenated into the profile vector so the matcher
+            reads the direction the user is committing to.
+        exclude:
+          type: array
+          items: { type: string }
+          description: |
+            Skills currently visible on chips but not picked. ai-core never
+            returns these even if they outrank everything else — protects the
+            "remove one chip, refill one chip, other four stay put" UX.
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 20
+          description: |
+            How many fresh skills to return. Initial first-paint suggest is 5;
+            chip-refill calls send 1.
+        pickedSkill:
+          type: string
+          description: |
+            Set by laddro-backend when this request was triggered by a user
+            tapping a chip. Backend uses it to increment
+            `skill_selections.(bucket_id, pickedSkill, locale).count` before
+            forwarding to ai-core. ai-core ignores this field — the picked
+            skill will already be reflected in `existingSkills`.
+
+    SkillsSuggestResponse:
+      type: object
+      required: [skills, source]
+      description: |
+        Result of a `POST /v1/skills/suggest` call. Returns up to `limit`
+        skills, all of which are absent from `existingSkills` and `exclude`.
+      properties:
+        skills:
+          type: array
+          items:
+            $ref: '#/components/schemas/SuggestedSkill'
+        source:
+          type: string
+          enum: [embedding, embedding+crowdsource, llm_fallback]
+          description: |
+            Which path produced this batch. `embedding` = pure cosine match,
+            no crowdsource signal had any influence on the top results.
+            `embedding+crowdsource` = at least one returned skill was boosted
+            past a rival by `skill_selections` counts. `llm_fallback` = the
+            embedding pool didn't produce enough above-threshold candidates
+            and we called the LLM to complete the batch. Logged for telemetry,
+            not user-visible.
+        usage:
+          $ref: '#/components/schemas/SkillsGenerationUsage'
+
+    SuggestedSkill:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          description: |
+            Locale-labelled skill name. This is the literal string we put on
+            the chip and append to `resume.skills` if the user picks it.
+
+    SkillsGenerationUsage:
+      type: object
+      required: [model]
+      description: |
+        Per-call usage block. On the embedding path token counts are zero and
+        `model` is the sentence-transformer id (e.g. `sentence-transformers/
+        paraphrase-multilingual-mpnet-base-v2`). On the LLM-fallback path
+        token counts reflect the small prompt and `model` is the LLM that
+        produced the completion.
+      properties:
+        promptTokens:
+          type: integer
+          minimum: 0
+          default: 0
+        outputTokens:
+          type: integer
+          minimum: 0
+          default: 0
+        model:
+          type: string
+
+    ResumeSkillSuggestions:
+      type: object
+      required: [bucketId, displayed, excluded, updatedAt]
+      description: |
+        Persisted per-resume state. Inlined into `getResumeById` so the
+        frontend can render the first 5 chips with zero API calls on every
+        return visit. Updated whenever ai-core returns a fresh batch.
+      properties:
+        bucketId:
+          type: string
+          description: |
+            The bucket the classifier put this resume into. Cached so we never
+            re-run the classifier just to refill a chip. If the resume changes
+            shape enough that the classifier would route it elsewhere, we
+            recompute on the next first-paint suggest.
+        displayed:
+          type: array
+          items:
+            type: string
+          description: |
+            The skill names currently visible on chips (length <= 5).
+        excluded:
+          type: array
+          items:
+            type: string
+          description: |
+            Cumulative blocklist of everything ever shown on a chip for this
+            resume, regardless of whether the user picked or skipped. Keeps
+            us from re-suggesting a skill the user has already seen.
+        updatedAt:
+          type: string
+          format: date-time
