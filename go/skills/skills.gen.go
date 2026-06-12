@@ -117,6 +117,22 @@ type SkillsGenerationUsage struct {
 // matching `POST /api/skills/suggest` on laddro-backend, which forwards
 // the same envelope after persisting the pick side-effect).
 type SkillsSuggestRequest struct {
+	// BucketId Cached bucket id from a previous response. When present, ai-core
+	// skips classification and trusts this assignment (the resume hasn't
+	// shifted shape enough to re-route). When omitted (first paint or
+	// forced reclassify), ai-core classifies and returns the bucket it
+	// picked in `bucketId` of the response.
+	BucketId *string `json:"bucketId,omitempty"`
+
+	// CrowdsourceBoost Per-skill pick counts derived from `skill_selections` for this
+	// `(bucketId, locale)` slice — typically the top ~100 most-picked
+	// skills. ai-core adds `0.15 * log(1 + count)` to the cosine score
+	// of any candidate whose name matches a key here. The crowdsource
+	// counts live on the backend; ai-core is stateless wrt this table
+	// and receives the snapshot per request. Omitted on the very first
+	// call when no bucketId is cached yet (boost is empty in that case).
+	CrowdsourceBoost *map[string]int `json:"crowdsourceBoost,omitempty"`
+
 	// Exclude Skills currently visible on chips but not picked. ai-core never
 	// returns these even if they outrank everything else — protects the
 	// "remove one chip, refill one chip, other four stay put" UX.
@@ -165,7 +181,13 @@ type SkillsSuggestRequestLocale string
 // SkillsSuggestResponse Result of a `POST /v1/skills/suggest` call. Returns up to `limit`
 // skills, all of which are absent from `existingSkills` and `exclude`.
 type SkillsSuggestResponse struct {
-	Skills []SuggestedSkill `json:"skills"`
+	// BucketId Bucket id ai-core used for this response — either the one the
+	// caller passed in `request.bucketId` (verbatim) or the one ai-core
+	// picked via embedding-match classification when the request omitted
+	// it. Backend persists this on `resume_skill_suggestions.bucket_id`
+	// so subsequent refill calls can scope the crowdsource fetch.
+	BucketId string           `json:"bucketId"`
+	Skills   []SuggestedSkill `json:"skills"`
 
 	// Source Which path produced this batch. `embedding` = pure cosine match,
 	// no crowdsource signal had any influence on the top results.

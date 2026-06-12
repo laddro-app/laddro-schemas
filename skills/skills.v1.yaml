@@ -84,10 +84,31 @@ components:
             `skill_selections.(bucket_id, pickedSkill, locale).count` before
             forwarding to ai-core. ai-core ignores this field — the picked
             skill will already be reflected in `existingSkills`.
+        bucketId:
+          type: string
+          description: |
+            Cached bucket id from a previous response. When present, ai-core
+            skips classification and trusts this assignment (the resume hasn't
+            shifted shape enough to re-route). When omitted (first paint or
+            forced reclassify), ai-core classifies and returns the bucket it
+            picked in `bucketId` of the response.
+        crowdsourceBoost:
+          type: object
+          additionalProperties:
+            type: integer
+            minimum: 0
+          description: |
+            Per-skill pick counts derived from `skill_selections` for this
+            `(bucketId, locale)` slice — typically the top ~100 most-picked
+            skills. ai-core adds `0.15 * log(1 + count)` to the cosine score
+            of any candidate whose name matches a key here. The crowdsource
+            counts live on the backend; ai-core is stateless wrt this table
+            and receives the snapshot per request. Omitted on the very first
+            call when no bucketId is cached yet (boost is empty in that case).
 
     SkillsSuggestResponse:
       type: object
-      required: [skills, source]
+      required: [skills, source, bucketId]
       description: |
         Result of a `POST /v1/skills/suggest` call. Returns up to `limit`
         skills, all of which are absent from `existingSkills` and `exclude`.
@@ -96,6 +117,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SuggestedSkill'
+        bucketId:
+          type: string
+          description: |
+            Bucket id ai-core used for this response — either the one the
+            caller passed in `request.bucketId` (verbatim) or the one ai-core
+            picked via embedding-match classification when the request omitted
+            it. Backend persists this on `resume_skill_suggestions.bucket_id`
+            so subsequent refill calls can scope the crowdsource fetch.
         source:
           type: string
           enum: [embedding, embedding+crowdsource, llm_fallback]
