@@ -3,6 +3,32 @@
 All notable changes to `@laddro-app/schemas` are documented here.
 This package follows [Semantic Versioning](https://semver.org/).
 
+## 0.7.0 — 2026-06-12
+
+### Added (cover-letter)
+- `CoverLetterGenerateRequest` — request body for `POST /v1/cover-letter`
+  on `laddro-ai-core`. Accepts a possibly-partial `initialContent`
+  envelope (every personal + employer field optional), the V1 Resume, the
+  raw JD, the locale, and an optional `tone`. ai-core fills empty fields
+  from the resume (personal) and the JD (employer) and writes the body.
+- `CoverLetterGenerateResponse` — wraps the existing `CoverLetterContent`
+  (unchanged) with a `filled` array indicating which fields ai-core
+  synthesized vs echoed (so the standalone CL editor can render "AI
+  filled this" badges) and a `usage` block for token + model accounting.
+- `CoverLetterPersonalDetailsPartial` — same fields as
+  `CoverLetterPersonalDetails` but every field optional. Used inside
+  `initialContent`.
+- `GenerationUsage` — shared usage block (`promptTokens`, `outputTokens`,
+  `model`). The first home for this shape; the tailor spec will reuse it
+  once `/v1/tailor` reports the same accounting.
+
+### Architectural context
+- Companion plan: `obsidian/laddro/plans/cover-letter-ai-core.md`.
+- This release adds types only; no consumer is on it yet. PR 2
+  (`laddro-ai-core`) implements the endpoint; PR 3 (`laddro-backend`)
+  adds the proxy client behind a flag; PR 4 flips the flag and deletes
+  the in-Node Claude/OpenAI/Gemini cover-letter fallback chain.
+
 ## 0.5.0 — 2026-06-09
 
 ### Added (tailor 2.0.0 — BREAKING)

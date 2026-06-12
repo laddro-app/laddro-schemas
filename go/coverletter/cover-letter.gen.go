@@ -11,52 +11,172 @@ import (
 
 // Defines values for CoverLetterLocale.
 const (
-	Da CoverLetterLocale = "da"
-	De CoverLetterLocale = "de"
-	En CoverLetterLocale = "en"
-	Es CoverLetterLocale = "es"
-	Et CoverLetterLocale = "et"
-	Fi CoverLetterLocale = "fi"
-	Fr CoverLetterLocale = "fr"
-	Is CoverLetterLocale = "is"
-	It CoverLetterLocale = "it"
-	Nl CoverLetterLocale = "nl"
-	No CoverLetterLocale = "no"
-	Pl CoverLetterLocale = "pl"
-	Pt CoverLetterLocale = "pt"
-	Sv CoverLetterLocale = "sv"
+	CoverLetterLocaleDa CoverLetterLocale = "da"
+	CoverLetterLocaleDe CoverLetterLocale = "de"
+	CoverLetterLocaleEn CoverLetterLocale = "en"
+	CoverLetterLocaleEs CoverLetterLocale = "es"
+	CoverLetterLocaleEt CoverLetterLocale = "et"
+	CoverLetterLocaleFi CoverLetterLocale = "fi"
+	CoverLetterLocaleFr CoverLetterLocale = "fr"
+	CoverLetterLocaleIs CoverLetterLocale = "is"
+	CoverLetterLocaleIt CoverLetterLocale = "it"
+	CoverLetterLocaleNl CoverLetterLocale = "nl"
+	CoverLetterLocaleNo CoverLetterLocale = "no"
+	CoverLetterLocalePl CoverLetterLocale = "pl"
+	CoverLetterLocalePt CoverLetterLocale = "pt"
+	CoverLetterLocaleSv CoverLetterLocale = "sv"
 )
 
 // Valid indicates whether the value is a known member of the CoverLetterLocale enum.
 func (e CoverLetterLocale) Valid() bool {
 	switch e {
-	case Da:
+	case CoverLetterLocaleDa:
 		return true
-	case De:
+	case CoverLetterLocaleDe:
 		return true
-	case En:
+	case CoverLetterLocaleEn:
 		return true
-	case Es:
+	case CoverLetterLocaleEs:
 		return true
-	case Et:
+	case CoverLetterLocaleEt:
 		return true
-	case Fi:
+	case CoverLetterLocaleFi:
 		return true
-	case Fr:
+	case CoverLetterLocaleFr:
 		return true
-	case Is:
+	case CoverLetterLocaleIs:
 		return true
-	case It:
+	case CoverLetterLocaleIt:
 		return true
-	case Nl:
+	case CoverLetterLocaleNl:
 		return true
-	case No:
+	case CoverLetterLocaleNo:
 		return true
-	case Pl:
+	case CoverLetterLocalePl:
 		return true
-	case Pt:
+	case CoverLetterLocalePt:
 		return true
-	case Sv:
+	case CoverLetterLocaleSv:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CoverLetterGenerateRequestLocale.
+const (
+	CoverLetterGenerateRequestLocaleDa CoverLetterGenerateRequestLocale = "da"
+	CoverLetterGenerateRequestLocaleDe CoverLetterGenerateRequestLocale = "de"
+	CoverLetterGenerateRequestLocaleEn CoverLetterGenerateRequestLocale = "en"
+	CoverLetterGenerateRequestLocaleEs CoverLetterGenerateRequestLocale = "es"
+	CoverLetterGenerateRequestLocaleEt CoverLetterGenerateRequestLocale = "et"
+	CoverLetterGenerateRequestLocaleFi CoverLetterGenerateRequestLocale = "fi"
+	CoverLetterGenerateRequestLocaleFr CoverLetterGenerateRequestLocale = "fr"
+	CoverLetterGenerateRequestLocaleIs CoverLetterGenerateRequestLocale = "is"
+	CoverLetterGenerateRequestLocaleIt CoverLetterGenerateRequestLocale = "it"
+	CoverLetterGenerateRequestLocaleNl CoverLetterGenerateRequestLocale = "nl"
+	CoverLetterGenerateRequestLocaleNo CoverLetterGenerateRequestLocale = "no"
+	CoverLetterGenerateRequestLocalePl CoverLetterGenerateRequestLocale = "pl"
+	CoverLetterGenerateRequestLocalePt CoverLetterGenerateRequestLocale = "pt"
+	CoverLetterGenerateRequestLocaleSv CoverLetterGenerateRequestLocale = "sv"
+)
+
+// Valid indicates whether the value is a known member of the CoverLetterGenerateRequestLocale enum.
+func (e CoverLetterGenerateRequestLocale) Valid() bool {
+	switch e {
+	case CoverLetterGenerateRequestLocaleDa:
+		return true
+	case CoverLetterGenerateRequestLocaleDe:
+		return true
+	case CoverLetterGenerateRequestLocaleEn:
+		return true
+	case CoverLetterGenerateRequestLocaleEs:
+		return true
+	case CoverLetterGenerateRequestLocaleEt:
+		return true
+	case CoverLetterGenerateRequestLocaleFi:
+		return true
+	case CoverLetterGenerateRequestLocaleFr:
+		return true
+	case CoverLetterGenerateRequestLocaleIs:
+		return true
+	case CoverLetterGenerateRequestLocaleIt:
+		return true
+	case CoverLetterGenerateRequestLocaleNl:
+		return true
+	case CoverLetterGenerateRequestLocaleNo:
+		return true
+	case CoverLetterGenerateRequestLocalePl:
+		return true
+	case CoverLetterGenerateRequestLocalePt:
+		return true
+	case CoverLetterGenerateRequestLocaleSv:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CoverLetterGenerateRequestTone.
+const (
+	Concise      CoverLetterGenerateRequestTone = "concise"
+	Enthusiastic CoverLetterGenerateRequestTone = "enthusiastic"
+	Professional CoverLetterGenerateRequestTone = "professional"
+)
+
+// Valid indicates whether the value is a known member of the CoverLetterGenerateRequestTone enum.
+func (e CoverLetterGenerateRequestTone) Valid() bool {
+	switch e {
+	case Concise:
+		return true
+	case Enthusiastic:
+		return true
+	case Professional:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CoverLetterGenerateResponseFilledEmployerDetails.
+const (
+	CompanyName       CoverLetterGenerateResponseFilledEmployerDetails = "companyName"
+	HiringManagerName CoverLetterGenerateResponseFilledEmployerDetails = "hiringManagerName"
+)
+
+// Valid indicates whether the value is a known member of the CoverLetterGenerateResponseFilledEmployerDetails enum.
+func (e CoverLetterGenerateResponseFilledEmployerDetails) Valid() bool {
+	switch e {
+	case CompanyName:
+		return true
+	case HiringManagerName:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CoverLetterGenerateResponseFilledPersonalDetails.
+const (
+	Address  CoverLetterGenerateResponseFilledPersonalDetails = "address"
+	Email    CoverLetterGenerateResponseFilledPersonalDetails = "email"
+	FullName CoverLetterGenerateResponseFilledPersonalDetails = "fullName"
+	JobTitle CoverLetterGenerateResponseFilledPersonalDetails = "jobTitle"
+	Phone    CoverLetterGenerateResponseFilledPersonalDetails = "phone"
+)
+
+// Valid indicates whether the value is a known member of the CoverLetterGenerateResponseFilledPersonalDetails enum.
+func (e CoverLetterGenerateResponseFilledPersonalDetails) Valid() bool {
+	switch e {
+	case Address:
+		return true
+	case Email:
+		return true
+	case FullName:
+		return true
+	case JobTitle:
+		return true
+	case Phone:
 		return true
 	default:
 		return false
@@ -100,11 +220,117 @@ type CoverLetterEmployerDetails struct {
 	HiringManagerName *string `json:"hiringManagerName,omitempty"`
 }
 
+// CoverLetterGenerateRequest Request body for `POST /v1/cover-letter` on laddro-ai-core.
+//
+// `initialContent` is a possibly-partial envelope — the caller passes
+// whatever it already has from the user (the standalone CL page often
+// has everything; the tailor flow usually has only company name on
+// `employerDetails`). ai-core fills empty personal fields from the
+// resume verbatim and runs a narrow LLM extract on the JD for empty
+// employer fields. Always-overwritten: `letterContent` is generated.
+type CoverLetterGenerateRequest struct {
+	// InitialContent Partial content envelope. Every nested field is optional. ai-core
+	// echoes what's provided and fills only the empties.
+	InitialContent *struct {
+		EmployerDetails *CoverLetterEmployerDetails `json:"employerDetails,omitempty"`
+
+		// PersonalDetails Same fields as `CoverLetterPersonalDetails` but every field is
+		// optional. Used in `CoverLetterGenerateRequest.initialContent` so
+		// the caller can submit whatever it already has (or nothing) and let
+		// ai-core fill the gaps from the resume.
+		PersonalDetails *CoverLetterPersonalDetailsPartial `json:"personalDetails,omitempty"`
+	} `json:"initialContent,omitempty"`
+
+	// JobDescription Raw job description text the user submitted. Used by the employer
+	// extractor (only when companyName / hiringManagerName are absent)
+	// and by the body writer to ground the experience paragraph.
+	JobDescription string `json:"jobDescription"`
+
+	// Locale BCP-47-ish locale code. Drives salutation + closing template
+	// selection AND the body writer's output language. Every word of
+	// the returned letter is in this language — no English fallback
+	// phrases sneak in.
+	Locale CoverLetterGenerateRequestLocale `json:"locale"`
+
+	// PositionName Position name. Tailor flow always passes this from the form. The
+	// standalone page may omit it; ai-core falls back to
+	// `resume.personal.role` when this is absent AND the user did not
+	// fill `personalDetails.jobTitle`.
+	PositionName *string `json:"positionName,omitempty"`
+
+	// Resume The candidate's V1 Resume. Used both as the source for personal
+	// field fills (firstName, lastName, email, phone, city/country)
+	// and as the evidence the body writer cites in the experience
+	// paragraph. Required because we cannot write a believable letter
+	// without grounding.
+	Resume map[string]interface{} `json:"resume"`
+
+	// Tone Voice for the body writer. `professional` is the default formal
+	// register most industries expect. `enthusiastic` leans warmer for
+	// startups / creative roles. `concise` produces tighter
+	// paragraphs for senior-IC roles that want signal over fluff.
+	Tone *CoverLetterGenerateRequestTone `json:"tone,omitempty"`
+}
+
+// CoverLetterGenerateRequestLocale BCP-47-ish locale code. Drives salutation + closing template
+// selection AND the body writer's output language. Every word of
+// the returned letter is in this language — no English fallback
+// phrases sneak in.
+type CoverLetterGenerateRequestLocale string
+
+// CoverLetterGenerateRequestTone Voice for the body writer. `professional` is the default formal
+// register most industries expect. `enthusiastic` leans warmer for
+// startups / creative roles. `concise` produces tighter
+// paragraphs for senior-IC roles that want signal over fluff.
+type CoverLetterGenerateRequestTone string
+
+// CoverLetterGenerateResponse Result of a `POST /v1/cover-letter` call. `content` is the existing
+// `CoverLetterContent` shape — same envelope the editor and the
+// renderer already consume — so the response is drop-in for both the
+// standalone page (which then opens the editor) and the tailor worker
+// (which persists it into the reserved CL UUID slot).
+type CoverLetterGenerateResponse struct {
+	Content CoverLetterContent `json:"content"`
+
+	// Filled Which fields ai-core synthesized vs echoed from the request.
+	// Lets the standalone CL editor render a subtle "AI filled this"
+	// badge so the user knows which fields to double-check. Empty
+	// arrays mean the caller provided every field verbatim.
+	Filled struct {
+		EmployerDetails []CoverLetterGenerateResponseFilledEmployerDetails `json:"employerDetails"`
+		PersonalDetails []CoverLetterGenerateResponseFilledPersonalDetails `json:"personalDetails"`
+	} `json:"filled"`
+
+	// Usage Per-call usage block returned by ai-core for any LLM-backed endpoint.
+	// Centralised in the cover-letter spec because that's the first place
+	// we need it; the tailor spec will reuse this shape once the same
+	// accounting is added to `/v1/tailor`.
+	Usage GenerationUsage `json:"usage"`
+}
+
+// CoverLetterGenerateResponseFilledEmployerDetails defines model for CoverLetterGenerateResponse.Filled.EmployerDetails.
+type CoverLetterGenerateResponseFilledEmployerDetails string
+
+// CoverLetterGenerateResponseFilledPersonalDetails defines model for CoverLetterGenerateResponse.Filled.PersonalDetails.
+type CoverLetterGenerateResponseFilledPersonalDetails string
+
 // CoverLetterPersonalDetails defines model for CoverLetterPersonalDetails.
 type CoverLetterPersonalDetails struct {
 	Address  *string              `json:"address,omitempty"`
 	Email    *openapi_types.Email `json:"email,omitempty"`
 	FullName string               `json:"fullName"`
+	JobTitle *string              `json:"jobTitle,omitempty"`
+	Phone    *string              `json:"phone,omitempty"`
+}
+
+// CoverLetterPersonalDetailsPartial Same fields as `CoverLetterPersonalDetails` but every field is
+// optional. Used in `CoverLetterGenerateRequest.initialContent` so
+// the caller can submit whatever it already has (or nothing) and let
+// ai-core fill the gaps from the resume.
+type CoverLetterPersonalDetailsPartial struct {
+	Address  *string              `json:"address,omitempty"`
+	Email    *openapi_types.Email `json:"email,omitempty"`
+	FullName *string              `json:"fullName,omitempty"`
 	JobTitle *string              `json:"jobTitle,omitempty"`
 	Phone    *string              `json:"phone,omitempty"`
 }
@@ -117,4 +343,21 @@ type CoverLetterStyling struct {
 	FontSize   *int     `json:"fontSize,omitempty"`
 	LineHeight *float32 `json:"lineHeight,omitempty"`
 	Margin     *float32 `json:"margin,omitempty"`
+}
+
+// GenerationUsage Per-call usage block returned by ai-core for any LLM-backed endpoint.
+// Centralised in the cover-letter spec because that's the first place
+// we need it; the tailor spec will reuse this shape once the same
+// accounting is added to `/v1/tailor`.
+type GenerationUsage struct {
+	// Model Provider + model that produced the body (`gemini-2.5-flash` /
+	// `gpt-4.1-mini` / `claude-sonnet-4-6` / ...). Reflects the writer
+	// call only — the extractor reports separately when needed.
+	Model string `json:"model"`
+
+	// OutputTokens Sum of output tokens across the extractor + writer calls.
+	OutputTokens int `json:"outputTokens"`
+
+	// PromptTokens Sum of input tokens across the extractor + writer calls.
+	PromptTokens int `json:"promptTokens"`
 }
