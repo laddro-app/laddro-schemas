@@ -16,13 +16,18 @@ info:
       bank stored as JSON at `bullet_templates/<section>/<bucket>_<locale>.json`.
       Lookup is strict: no English fallback. If a locale × section cell hasn't
       shipped yet, the chip strip stays empty for that user.
-    - Auto-fill placeholders are substituted by the worker from the per-section
-      context the backend ships: [ROLE], [COMPANY], [STACK] for employment;
-      [PROJECT_NAME], [STACK] for projects; [FIELD], [SCHOOL] for education;
-      [ORG], [ROLE] for extra-curricular; [STACK] for custom.
-    - User-fill placeholders stay in the template ([METRIC], [X%], [NUMBER],
-      [TEAM_SIZE], [FEATURE], [ACTION]) — the user picks a chip and the
-      placeholders surface as editable spans for honest filling.
+    - Auto-fill placeholders (7 tokens) are substituted by the worker from the
+      per-section context the backend ships: [ROLE], [COMPANY], [STACK],
+      [PROJECT_NAME], [FIELD], [SCHOOL], [ORG]. Each section uses the subset
+      relevant to its shape — e.g. employment uses [ROLE]/[COMPANY]/[STACK];
+      projects uses [PROJECT_NAME]/[STACK]; education uses [FIELD]/[SCHOOL].
+    - User-fill placeholders (10 tokens) stay in the template — the user picks
+      a chip and the placeholders surface as editable spans for honest filling:
+      [METRIC], [X%], [NUMBER], [TEAM_SIZE], [FEATURE], [ACTION], [TOPIC],
+      [ACHIEVEMENT], [OUTCOME], [DURATION]. [DURATION] is a single time-span
+      phrase ("3 months", "6 semesters", "2 Jahre") rather than [NUMBER]+unit,
+      so per-locale number+unit inflection (German cases, Polish plurals) is
+      owned by the user fill, not the template.
     - The [STACK] joiner is locale-aware (FR uses "et" + Oxford comma; DE
       uses "und"). Joiner logic lives in the worker.
 
