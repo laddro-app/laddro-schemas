@@ -20,6 +20,12 @@ tailor/
   fixtures/
     worker-output/<locale>/<industry>/ canonical JD inputs + expected JobDescription
                                        (14 locales × ≥8 industries — CI floor)
+skills/
+  skills.v1.yaml                       OpenAPI 3.1 component schemas
+content/
+  content.v1.yaml                      OpenAPI 3.1 component schemas
+bullets/
+  bullets.v1.yaml                      OpenAPI 3.1 component schemas
 scripts/
   generate-ts.sh                       runs openapi-typescript
   generate-go.sh                       runs oapi-codegen

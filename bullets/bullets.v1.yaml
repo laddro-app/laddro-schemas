@@ -1,0 +1,203 @@
+openapi: 3.1.0
+info:
+  title: Laddro Bullets Suggestion Schema
+  version: 1.0.0
+  description: |
+    Canonical request/response types for the bullet-template chip pipeline.
+    Consumed by laddro-web-app, laddro-backend, and laddro-ai-core.
+
+    Architecture summary (see obsidian/laddro/plans/bullets-suggest-full-coverage.md
+    for the full design):
+
+    - The bullet chip strip lives under every section item in the builder
+      (employment, projects, education, extra-curricular, custom). It surfaces
+      ~5 honest templates pre-filled with the candidate's resume context.
+    - The worker (services/nlp/app/bullet_suggest.py) owns a curated template
+      bank stored as JSON at `bullet_templates/<section>/<bucket>_<locale>.json`.
+      Lookup is strict: no English fallback. If a locale × section cell hasn't
+      shipped yet, the chip strip stays empty for that user.
+    - Auto-fill placeholders (7 tokens) are substituted by the worker from the
+      per-section context the backend ships: [ROLE], [COMPANY], [STACK],
+      [PROJECT_NAME], [FIELD], [SCHOOL], [ORG]. Each section uses the subset
+      relevant to its shape — e.g. employment uses [ROLE]/[COMPANY]/[STACK];
+      projects uses [PROJECT_NAME]/[STACK]; education uses [FIELD]/[SCHOOL].
+    - User-fill placeholders (10 tokens) stay in the template — the user picks
+      a chip and the placeholders surface as editable spans for honest filling:
+      [METRIC], [X%], [NUMBER], [TEAM_SIZE], [FEATURE], [ACTION], [TOPIC],
+      [ACHIEVEMENT], [OUTCOME], [DURATION]. [DURATION] is a single time-span
+      phrase ("3 months", "6 semesters", "2 Jahre") rather than [NUMBER]+unit,
+      so per-locale number+unit inflection (German cases, Polish plurals) is
+      owned by the user fill, not the template.
+    - The [STACK] joiner is locale-aware (FR uses "et" + Oxford comma; DE
+      uses "und"). Joiner logic lives in the worker.
+
+    v2 of this contract (this file) introduces the `BulletSection` enum and
+    per-section item-id / context fields. v1 (now retired) was employment-only
+    with no formal schema — backend and ai-core spoke a hand-coded JSON shape.
+
+components:
+  schemas:
+    BulletSection:
+      type: string
+      enum:
+        - employment
+        - projects
+        - education
+        - extra_curricular
+        - custom
+      description: |
+        Which resume section the chip strip is rendering under. Drives:
+        - which `<section>/` subdirectory of the template bank the worker reads
+        - which item-id field on the request the backend honors
+        - which auto-fill placeholders the worker substitutes
+
+    BulletsSuggestRequest:
+      type: object
+      required: [resumeId, section, locale, limit]
+      description: |
+        Public envelope: `POST /api/bullets/suggest` body (web → backend).
+        Backend looks up the resume, walks to the section item the matching
+        `*ItemId` field points at, extracts context, then forwards a
+        `BulletsWorkerRequest` to ai-core. Exactly one of the five item-id
+        fields must be present and it must match `section`.
+      properties:
+        resumeId:
+          type: string
+          description: Resume id the bullets belong to.
+        section:
+          $ref: '#/components/schemas/BulletSection'
+        employmentItemId:
+          type: string
+          description: |
+            Required when `section = employment`. Id of the employment item
+            the chip strip will render under.
+        projectItemId:
+          type: string
+          description: Required when `section = projects`.
+        educationItemId:
+          type: string
+          description: Required when `section = education`.
+        extraCurricularItemId:
+          type: string
+          description: Required when `section = extra_curricular`.
+        customItemId:
+          type: string
+          description: Required when `section = custom`.
+        locale:
+          type: string
+          enum: [en, de, es, fr, it, nl, pl, pt, is, fi, sv, no, da, et]
+          description: |
+            Drives which `<bucket>_<locale>.json` cell the worker loads. No
+            English fallback — if the locale × section cell is empty, the
+            response returns zero templates and the frontend renders nothing.
+        exclude:
+          type: array
+          items: { type: string }
+          maxItems: 20
+          description: |
+            Raw template strings currently visible on the chip strip — the
+            worker never re-suggests these even if they outrank everything
+            else. Protects the "remove one chip, refill one chip, others
+            stay put" UX.
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 10
+          description: |
+            How many fresh templates to return. First paint sends 5; chip
+            refill sends 1.
+
+    BulletsWorkerRequest:
+      type: object
+      required: [section, locale, limit]
+      description: |
+        Backend → ai-core wire body for `POST /v1/bullets/suggest`. Backend
+        has the DB and the user session, so it pre-extracts every field the
+        worker needs to fill auto-placeholders. ai-core stays stateless and
+        the worker never queries Postgres.
+
+        The per-section context fields below are populated only when relevant
+        to `section`. The worker reads only the ones its template references
+        — sending an unused field is a no-op, not an error.
+      properties:
+        section:
+          $ref: '#/components/schemas/BulletSection'
+        locale:
+          type: string
+          enum: [en, de, es, fr, it, nl, pl, pt, is, fi, sv, no, da, et]
+        existingSkills:
+          type: array
+          items: { type: string }
+          description: |
+            Up to ~5 skill names from the resume. Joined locale-aware by the
+            worker to fill the `[STACK]` placeholder. Used by every section
+            that references `[STACK]` (employment, projects, custom).
+        role:
+          type: string
+          description: |
+            Fills `[ROLE]`. Source per section:
+            - employment: employment item's `position`
+            - extra_curricular: extra-curricular item's `role`
+            - other sections: empty string
+        company:
+          type: string
+          description: |
+            Fills `[COMPANY]`. Sourced from the employment item's `company`.
+            Empty for non-employment sections.
+        projectName:
+          type: string
+          description: |
+            Fills `[PROJECT_NAME]`. Sourced from the project item's `title`.
+            Empty for non-project sections.
+        educationField:
+          type: string
+          description: |
+            Fills `[FIELD]`. Sourced from the education item's `field`.
+            Empty for non-education sections.
+        school:
+          type: string
+          description: |
+            Fills `[SCHOOL]`. Sourced from the education item's `institution`.
+            Empty for non-education sections.
+        organization:
+          type: string
+          description: |
+            Fills `[ORG]`. Sourced from the extra-curricular item's
+            `organization`. Empty for other sections.
+        exclude:
+          type: array
+          items: { type: string }
+          maxItems: 20
+          description: Raw template strings to suppress. Forwarded verbatim.
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 10
+
+    BulletsSuggestResponse:
+      type: object
+      required: [bullets, rawTemplates]
+      description: |
+        Response from ai-core for `POST /v1/bullets/suggest`. Backend
+        forwards this verbatim to the frontend on `POST /api/bullets/suggest`.
+
+        Two parallel arrays of equal length:
+        - `bullets` — templates after auto-placeholder substitution. User-fill
+          placeholders ([METRIC], [X%], etc.) remain in the string and the
+          frontend renders them as editable spans.
+        - `rawTemplates` — the original template strings before substitution.
+          The frontend uses these as stable identifiers for the `exclude`
+          list (substituted strings change as resume context changes).
+      properties:
+        bullets:
+          type: array
+          items: { type: string }
+          description: |
+            Length 0..limit. Empty array means the locale × section cell has
+            no templates yet — frontend renders nothing (no English fallback).
+        rawTemplates:
+          type: array
+          items: { type: string }
+          description: |
+            Same length as `bullets`. Indexed pair: `rawTemplates[i]` is the
+            unsubstituted source of `bullets[i]`.
