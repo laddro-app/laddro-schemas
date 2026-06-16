@@ -15,6 +15,7 @@ declare -a SPECS=(
   "skills/skills.v1.yaml:skills.gen.ts"
   "content/content.v1.yaml:content.gen.ts"
   "bullets/bullets.v1.yaml:bullets.gen.ts"
+  "inbox/inbox.v1.yaml:inbox.gen.ts"
 )
 
 for entry in "${SPECS[@]}"; do

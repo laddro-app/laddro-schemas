@@ -4,3 +4,4 @@ export type { components as TailorComponents, paths as TailorPaths } from './tai
 export type { components as SkillsComponents, paths as SkillsPaths } from './skills.gen.js';
 export type { components as ContentComponents, paths as ContentPaths } from './content.gen.js';
 export type { components as BulletsComponents, paths as BulletsPaths } from './bullets.gen.js';
+export type { components as InboxComponents, paths as InboxPaths } from './inbox.gen.js';
