@@ -1,0 +1,1236 @@
+openapi: 3.1.0
+info:
+  title: Laddro Inbox Events
+  version: 0.1.0
+  description: |
+    Shared contract for in-app inbox notifications. The backend publishes
+    `InboxEventInput` payloads to the `inbox-events` Pub/Sub topic (prod) or
+    POSTs them directly to the laddro-notifications service `/inbox-notify`
+    endpoint (local dev). The Go service wraps them as `InboxEnvelope`,
+    persists a row in `notification_inbox`, and renders title/description/
+    actions at fetch-time against the user's locale.
+
+    Each `InboxKind` has its own typed `params` shape — this lets backend
+    callers publish a typed event and lets the Go renderer know which keys
+    its i18n templates can interpolate.
+
+    Source of truth for the kind list. Adding a new inbox kind means:
+      1. Add the kind to `InboxKind` here.
+      2. Add a `params` schema for the kind in `components.schemas`.
+      3. Add the kind to the `oneOf` of `InboxEventInput`.
+      4. Run `bash scripts/generate-ts.sh && bash scripts/generate-go.sh`.
+      5. Add i18n templates in `laddro-notifications/internal/i18n/locales/*`.
+      6. Add the kind to `laddro-notifications/internal/inbox/kind_config.go`.
+
+paths: {}
+
+components:
+  schemas:
+
+    # -----------------------------------------------------------------
+    # Top-level enum + envelope types
+    # -----------------------------------------------------------------
+
+    InboxKind:
+      type: string
+      description: |
+        The full taxonomy of in-app notification kinds Laddro supports.
+        Backend authors should NOT publish a kind that is not in this enum —
+        the Go renderer drops unknown kinds on receive.
+      enum:
+        # account
+        - account.welcome
+        - account.email_verified
+        - account.password_changed
+        - account.password_reset_requested
+        - account.deletion_warning
+        - account.connected_added
+        - account.connected_removed
+        # billing
+        - billing.payment_succeeded
+        - billing.payment_failed
+        - billing.subscription_renewed
+        - billing.cancellation_scheduled
+        - billing.cancellation_confirmed
+        - billing.reactivated
+        - billing.trial_ending
+        - billing.card_expiring
+        - billing.invoice_available
+        - billing.refund_issued
+        # credits
+        - credits.added
+        - credits.low
+        - credits.depleted
+        - credits.monthly_reset
+        # document
+        - document.tailor_complete
+        - document.tailor_complete_failed
+        - document.tailor_no_fit
+        - document.ai_complete
+        - document.download_ready
+        - document.shared_by_you
+        - document.viewed_by_visitor
+        # tracker
+        - tracker.application_reminder
+        - tracker.interview_scheduled
+        - tracker.followup_due
+        - tracker.status_changed
+        - tracker.deadline_approaching
+        # engagement
+        - engagement.onboarding_incomplete
+        - engagement.first_resume_incomplete
+        - engagement.inactivity_nudge
+        - engagement.weekly_tip
+        - engagement.linkedin_update_reminder
+        # legal
+        - legal.terms_updated
+        - legal.privacy_updated
+        - legal.cookie_updated
+        - legal.gdpr_export_ready
+        - legal.gdpr_deletion_confirmed
+        # feedback
+        - feedback.raw_prompt
+        - feedback.trustpilot_request
+        - feedback.nps_survey
+        - feedback.feature_feedback
+        - feedback.beta_feedback
+        # referral
+        - referral.friend_signed_up
+        - referral.credits_earned
+        - referral.threshold_reached
+        # system
+        - system.feature_announcement
+        - system.scheduled_maintenance
+        - system.service_restored
+
+    InboxEventInput:
+      description: |
+        Discriminated union of every inbox event a backend can publish.
+        Callers use this type. The transport layer wraps it in an
+        `InboxEnvelope` before publishing.
+      oneOf:
+        - $ref: '#/components/schemas/Event_AccountWelcome'
+        - $ref: '#/components/schemas/Event_AccountEmailVerified'
+        - $ref: '#/components/schemas/Event_AccountPasswordChanged'
+        - $ref: '#/components/schemas/Event_AccountPasswordResetRequested'
+        - $ref: '#/components/schemas/Event_AccountDeletionWarning'
+        - $ref: '#/components/schemas/Event_AccountConnectedAdded'
+        - $ref: '#/components/schemas/Event_AccountConnectedRemoved'
+        - $ref: '#/components/schemas/Event_BillingPaymentSucceeded'
+        - $ref: '#/components/schemas/Event_BillingPaymentFailed'
+        - $ref: '#/components/schemas/Event_BillingSubscriptionRenewed'
+        - $ref: '#/components/schemas/Event_BillingCancellationScheduled'
+        - $ref: '#/components/schemas/Event_BillingCancellationConfirmed'
+        - $ref: '#/components/schemas/Event_BillingReactivated'
+        - $ref: '#/components/schemas/Event_BillingTrialEnding'
+        - $ref: '#/components/schemas/Event_BillingCardExpiring'
+        - $ref: '#/components/schemas/Event_BillingInvoiceAvailable'
+        - $ref: '#/components/schemas/Event_BillingRefundIssued'
+        - $ref: '#/components/schemas/Event_CreditsAdded'
+        - $ref: '#/components/schemas/Event_CreditsLow'
+        - $ref: '#/components/schemas/Event_CreditsDepleted'
+        - $ref: '#/components/schemas/Event_CreditsMonthlyReset'
+        - $ref: '#/components/schemas/Event_DocumentTailorComplete'
+        - $ref: '#/components/schemas/Event_DocumentTailorCompleteFailed'
+        - $ref: '#/components/schemas/Event_DocumentTailorNoFit'
+        - $ref: '#/components/schemas/Event_DocumentAiComplete'
+        - $ref: '#/components/schemas/Event_DocumentDownloadReady'
+        - $ref: '#/components/schemas/Event_DocumentSharedByYou'
+        - $ref: '#/components/schemas/Event_DocumentViewedByVisitor'
+        - $ref: '#/components/schemas/Event_TrackerApplicationReminder'
+        - $ref: '#/components/schemas/Event_TrackerInterviewScheduled'
+        - $ref: '#/components/schemas/Event_TrackerFollowupDue'
+        - $ref: '#/components/schemas/Event_TrackerStatusChanged'
+        - $ref: '#/components/schemas/Event_TrackerDeadlineApproaching'
+        - $ref: '#/components/schemas/Event_EngagementOnboardingIncomplete'
+        - $ref: '#/components/schemas/Event_EngagementFirstResumeIncomplete'
+        - $ref: '#/components/schemas/Event_EngagementInactivityNudge'
+        - $ref: '#/components/schemas/Event_EngagementWeeklyTip'
+        - $ref: '#/components/schemas/Event_EngagementLinkedinUpdateReminder'
+        - $ref: '#/components/schemas/Event_LegalTermsUpdated'
+        - $ref: '#/components/schemas/Event_LegalPrivacyUpdated'
+        - $ref: '#/components/schemas/Event_LegalCookieUpdated'
+        - $ref: '#/components/schemas/Event_LegalGdprExportReady'
+        - $ref: '#/components/schemas/Event_LegalGdprDeletionConfirmed'
+        - $ref: '#/components/schemas/Event_FeedbackRawPrompt'
+        - $ref: '#/components/schemas/Event_FeedbackTrustpilotRequest'
+        - $ref: '#/components/schemas/Event_FeedbackNpsSurvey'
+        - $ref: '#/components/schemas/Event_FeedbackFeatureFeedback'
+        - $ref: '#/components/schemas/Event_FeedbackBetaFeedback'
+        - $ref: '#/components/schemas/Event_ReferralFriendSignedUp'
+        - $ref: '#/components/schemas/Event_ReferralCreditsEarned'
+        - $ref: '#/components/schemas/Event_ReferralThresholdReached'
+        - $ref: '#/components/schemas/Event_SystemFeatureAnnouncement'
+        - $ref: '#/components/schemas/Event_SystemScheduledMaintenance'
+        - $ref: '#/components/schemas/Event_SystemServiceRestored'
+
+    InboxEnvelope:
+      description: |
+        The on-wire shape Pub/Sub carries / the HTTP transport POSTs. Adds
+        a UUID `id` for idempotency on top of the caller-supplied input.
+      type: object
+      required: [id, kind, userId, params]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Idempotency key generated by the publisher.
+        kind:
+          $ref: '#/components/schemas/InboxKind'
+        userId:
+          type: string
+          format: uuid
+        params:
+          type: object
+          additionalProperties: true
+        routeParams:
+          type: object
+          additionalProperties:
+            type: string
+          description: |
+            Optional per-action payload data the Go renderer attaches to
+            BlockAction.routeParams (used by failure-with-retry kinds so
+            the frontend can re-fire the original request one-click).
+
+    # Common base — every per-kind event has the same envelope minus the
+    # discriminating `kind` literal and the per-kind `params` shape.
+    BaseEvent:
+      type: object
+      required: [kind, userId, params]
+      properties:
+        userId:
+          type: string
+          format: uuid
+        routeParams:
+          type: object
+          additionalProperties:
+            type: string
+
+    # -----------------------------------------------------------------
+    # account.*
+    # -----------------------------------------------------------------
+
+    Event_AccountWelcome:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [account.welcome]
+            params:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: User's full name. Optional — current template doesn't interpolate it but callers send it.
+              additionalProperties: false
+
+    Event_AccountEmailVerified:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [account.email_verified]
+            params:
+              type: object
+              additionalProperties: false
+
+    Event_AccountPasswordChanged:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [account.password_changed]
+            params:
+              type: object
+              additionalProperties: false
+
+    Event_AccountPasswordResetRequested:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [account.password_reset_requested]
+            params:
+              type: object
+              additionalProperties: false
+
+    Event_AccountDeletionWarning:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [account.deletion_warning]
+            params:
+              type: object
+              required: [scheduledDate]
+              properties:
+                scheduledDate:
+                  type: string
+                  description: Localized date string — e.g. "12/15/2026".
+                requestedOn:
+                  type: string
+                  description: Localized date string for when the deletion was requested.
+              additionalProperties: false
+
+    Event_AccountConnectedAdded:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [account.connected_added]
+            params:
+              type: object
+              required: [provider]
+              properties:
+                provider:
+                  type: string
+                  enum: [google, linkedin, apple, microsoft]
+              additionalProperties: false
+
+    Event_AccountConnectedRemoved:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [account.connected_removed]
+            params:
+              type: object
+              required: [provider]
+              properties:
+                provider:
+                  type: string
+                  enum: [google, linkedin, apple, microsoft]
+              additionalProperties: false
+
+    # -----------------------------------------------------------------
+    # billing.*
+    # -----------------------------------------------------------------
+
+    Event_BillingPaymentSucceeded:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [billing.payment_succeeded]
+            params:
+              type: object
+              required: [amount, plan, nextRenewal]
+              properties:
+                amount:
+                  type: string
+                  description: Formatted amount with currency symbol — e.g. "€9.99".
+                plan:
+                  type: string
+                  description: Localized plan name — e.g. "Pro".
+                nextRenewal:
+                  type: string
+                  description: Localized next renewal date.
+                planType:
+                  type: string
+                  enum: [recurring, one-time]
+                currency:
+                  type: string
+                  description: ISO-4217 currency code (uppercase).
+                chargedOn:
+                  type: string
+                  description: Localized charge date.
+              additionalProperties: false
+
+    Event_BillingPaymentFailed:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [billing.payment_failed]
+            params:
+              type: object
+              required: [plan]
+              properties:
+                plan:
+                  type: string
+                amount:
+                  type: string
+                cardBrand:
+                  type: string
+                cardLast4:
+                  type: string
+                lastAttempt:
+                  type: string
+                failureReason:
+                  type: string
+              additionalProperties: false
+
+    Event_BillingSubscriptionRenewed:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [billing.subscription_renewed]
+            params:
+              type: object
+              required: [plan, nextRenewal]
+              properties:
+                plan:
+                  type: string
+                nextRenewal:
+                  type: string
+                period:
+                  type: string
+                  description: e.g. "month" / "year".
+                planType:
+                  type: string
+                  enum: [recurring, one-time]
+                amount:
+                  type: string
+                currency:
+                  type: string
+                chargedOn:
+                  type: string
+              additionalProperties: false
+
+    Event_BillingCancellationScheduled:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [billing.cancellation_scheduled]
+            params:
+              type: object
+              required: [endDate]
+              properties:
+                endDate:
+                  type: string
+                  description: Localized date the plan ends.
+                plan:
+                  type: string
+                reason:
+                  type: string
+              additionalProperties: false
+
+    Event_BillingCancellationConfirmed:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [billing.cancellation_confirmed]
+            params:
+              type: object
+              required: [plan]
+              properties:
+                plan:
+                  type: string
+              additionalProperties: false
+
+    Event_BillingReactivated:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [billing.reactivated]
+            params:
+              type: object
+              required: [plan, nextRenewal]
+              properties:
+                plan:
+                  type: string
+                nextRenewal:
+                  type: string
+              additionalProperties: false
+
+    Event_BillingTrialEnding:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [billing.trial_ending]
+            params:
+              type: object
+              required: [daysLeft, endDate]
+              properties:
+                daysLeft:
+                  type: string
+                  description: Days remaining as a string for safe template interpolation.
+                endDate:
+                  type: string
+              additionalProperties: false
+
+    Event_BillingCardExpiring:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [billing.card_expiring]
+            params:
+              type: object
+              required: [cardBrand, cardLast4, expiryDate, nextRenewal]
+              properties:
+                cardBrand:
+                  type: string
+                cardLast4:
+                  type: string
+                expiryDate:
+                  type: string
+                nextRenewal:
+                  type: string
+              additionalProperties: false
+
+    Event_BillingInvoiceAvailable:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [billing.invoice_available]
+            params:
+              type: object
+              required: [period]
+              properties:
+                period:
+                  type: string
+              additionalProperties: false
+
+    Event_BillingRefundIssued:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [billing.refund_issued]
+            params:
+              type: object
+              required: [amount]
+              properties:
+                amount:
+                  type: string
+              additionalProperties: false
+
+    # -----------------------------------------------------------------
+    # credits.*
+    # -----------------------------------------------------------------
+
+    Event_CreditsAdded:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [credits.added]
+            params:
+              type: object
+              required: [addedCount, newBalance]
+              properties:
+                addedCount:
+                  type: string
+                newBalance:
+                  type: string
+                plan:
+                  type: string
+                  description: Forward-compat — current Stripe one-time path sends plan/amount/currency alongside.
+                amount:
+                  type: string
+                currency:
+                  type: string
+                chargedOn:
+                  type: string
+                nextRenewal:
+                  type: string
+                planType:
+                  type: string
+              additionalProperties: false
+
+    Event_CreditsLow:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [credits.low]
+            params:
+              type: object
+              required: [remaining, resetDate]
+              properties:
+                remaining:
+                  type: string
+                resetDate:
+                  type: string
+              additionalProperties: false
+
+    Event_CreditsDepleted:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [credits.depleted]
+            params:
+              type: object
+              required: [resetDate]
+              properties:
+                resetDate:
+                  type: string
+              additionalProperties: false
+
+    Event_CreditsMonthlyReset:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [credits.monthly_reset]
+            params:
+              type: object
+              required: [newBalance]
+              properties:
+                newBalance:
+                  type: string
+              additionalProperties: false
+
+    # -----------------------------------------------------------------
+    # document.*
+    # -----------------------------------------------------------------
+
+    Event_DocumentTailorComplete:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [document.tailor_complete]
+            params:
+              type: object
+              required: [company, role]
+              properties:
+                company:
+                  type: string
+                role:
+                  type: string
+                matchScore:
+                  type: string
+                  description: Optional — interpolated when present.
+              additionalProperties: false
+
+    Event_DocumentTailorCompleteFailed:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [document.tailor_complete_failed]
+            params:
+              type: object
+              required: [role]
+              properties:
+                role:
+                  type: string
+                company:
+                  type: string
+                  description: May be empty string when caller doesn't have a company name.
+              additionalProperties: false
+
+    Event_DocumentTailorNoFit:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [document.tailor_no_fit]
+            params:
+              type: object
+              required: [role]
+              properties:
+                role:
+                  type: string
+                company:
+                  type: string
+              additionalProperties: false
+
+    Event_DocumentAiComplete:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [document.ai_complete]
+            params:
+              type: object
+              required: [resumeTitle]
+              properties:
+                resumeTitle:
+                  type: string
+              additionalProperties: false
+
+    Event_DocumentDownloadReady:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [document.download_ready]
+            params:
+              type: object
+              required: [resumeTitle]
+              properties:
+                resumeTitle:
+                  type: string
+              additionalProperties: false
+
+    Event_DocumentSharedByYou:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [document.shared_by_you]
+            params:
+              type: object
+              required: [resumeTitle]
+              properties:
+                resumeTitle:
+                  type: string
+              additionalProperties: false
+
+    Event_DocumentViewedByVisitor:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [document.viewed_by_visitor]
+            params:
+              type: object
+              required: [visitorLocation]
+              properties:
+                visitorLocation:
+                  type: string
+              additionalProperties: false
+
+    # -----------------------------------------------------------------
+    # tracker.*
+    # -----------------------------------------------------------------
+
+    Event_TrackerApplicationReminder:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [tracker.application_reminder]
+            params:
+              type: object
+              required: [count]
+              properties:
+                count:
+                  type: string
+              additionalProperties: false
+
+    Event_TrackerInterviewScheduled:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [tracker.interview_scheduled]
+            params:
+              type: object
+              required: [company, date, time, weekday]
+              properties:
+                company:
+                  type: string
+                date:
+                  type: string
+                time:
+                  type: string
+                weekday:
+                  type: string
+              additionalProperties: false
+
+    Event_TrackerFollowupDue:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [tracker.followup_due]
+            params:
+              type: object
+              required: [company, days]
+              properties:
+                company:
+                  type: string
+                days:
+                  type: string
+              additionalProperties: false
+
+    Event_TrackerStatusChanged:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [tracker.status_changed]
+            params:
+              type: object
+              required: [company, newStatus]
+              properties:
+                company:
+                  type: string
+                newStatus:
+                  type: string
+              additionalProperties: false
+
+    Event_TrackerDeadlineApproaching:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [tracker.deadline_approaching]
+            params:
+              type: object
+              required: [closeDate, company, daysLeft, role]
+              properties:
+                closeDate:
+                  type: string
+                company:
+                  type: string
+                daysLeft:
+                  type: string
+                role:
+                  type: string
+              additionalProperties: false
+
+    # -----------------------------------------------------------------
+    # engagement.*
+    # -----------------------------------------------------------------
+
+    Event_EngagementOnboardingIncomplete:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [engagement.onboarding_incomplete]
+            params:
+              type: object
+              required: [stepsLeft]
+              properties:
+                stepsLeft:
+                  type: string
+              additionalProperties: false
+
+    Event_EngagementFirstResumeIncomplete:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [engagement.first_resume_incomplete]
+            params:
+              type: object
+              additionalProperties: false
+
+    Event_EngagementInactivityNudge:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [engagement.inactivity_nudge]
+            params:
+              type: object
+              additionalProperties: false
+
+    Event_EngagementWeeklyTip:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [engagement.weekly_tip]
+            params:
+              type: object
+              additionalProperties: false
+
+    Event_EngagementLinkedinUpdateReminder:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [engagement.linkedin_update_reminder]
+            params:
+              type: object
+              additionalProperties: false
+
+    # -----------------------------------------------------------------
+    # legal.*
+    # -----------------------------------------------------------------
+
+    Event_LegalTermsUpdated:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [legal.terms_updated]
+            params:
+              type: object
+              required: [effectiveDate]
+              properties:
+                effectiveDate:
+                  type: string
+              additionalProperties: false
+
+    Event_LegalPrivacyUpdated:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [legal.privacy_updated]
+            params:
+              type: object
+              required: [effectiveDate]
+              properties:
+                effectiveDate:
+                  type: string
+              additionalProperties: false
+
+    Event_LegalCookieUpdated:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [legal.cookie_updated]
+            params:
+              type: object
+              additionalProperties: false
+
+    Event_LegalGdprExportReady:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [legal.gdpr_export_ready]
+            params:
+              type: object
+              required: [availableUntil]
+              properties:
+                availableUntil:
+                  type: string
+              additionalProperties: false
+
+    Event_LegalGdprDeletionConfirmed:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [legal.gdpr_deletion_confirmed]
+            params:
+              type: object
+              additionalProperties: false
+
+    # -----------------------------------------------------------------
+    # feedback.*
+    # -----------------------------------------------------------------
+
+    Event_FeedbackRawPrompt:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [feedback.raw_prompt]
+            params:
+              type: object
+              additionalProperties: false
+
+    Event_FeedbackTrustpilotRequest:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [feedback.trustpilot_request]
+            params:
+              type: object
+              additionalProperties: false
+
+    Event_FeedbackNpsSurvey:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [feedback.nps_survey]
+            params:
+              type: object
+              additionalProperties: false
+
+    Event_FeedbackFeatureFeedback:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [feedback.feature_feedback]
+            params:
+              type: object
+              required: [featureName]
+              properties:
+                featureName:
+                  type: string
+              additionalProperties: false
+
+    Event_FeedbackBetaFeedback:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [feedback.beta_feedback]
+            params:
+              type: object
+              required: [betaName]
+              properties:
+                betaName:
+                  type: string
+              additionalProperties: false
+
+    # -----------------------------------------------------------------
+    # referral.*
+    # -----------------------------------------------------------------
+
+    Event_ReferralFriendSignedUp:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [referral.friend_signed_up]
+            params:
+              type: object
+              required: [friendName]
+              properties:
+                friendName:
+                  type: string
+              additionalProperties: false
+
+    Event_ReferralCreditsEarned:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [referral.credits_earned]
+            params:
+              type: object
+              required: [credits, friendName]
+              properties:
+                credits:
+                  type: string
+                friendName:
+                  type: string
+              additionalProperties: false
+
+    Event_ReferralThresholdReached:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [referral.threshold_reached]
+            params:
+              type: object
+              required: [count, reward]
+              properties:
+                count:
+                  type: string
+                reward:
+                  type: string
+              additionalProperties: false
+
+    # -----------------------------------------------------------------
+    # system.*
+    # -----------------------------------------------------------------
+
+    Event_SystemFeatureAnnouncement:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [system.feature_announcement]
+            params:
+              type: object
+              required: [featureName, featureSummary, featureFullDescription]
+              properties:
+                featureName:
+                  type: string
+                featureSummary:
+                  type: string
+                featureFullDescription:
+                  type: string
+              additionalProperties: false
+
+    Event_SystemScheduledMaintenance:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [system.scheduled_maintenance]
+            params:
+              type: object
+              required: [date, startTime, endTime, when]
+              properties:
+                date:
+                  type: string
+                startTime:
+                  type: string
+                endTime:
+                  type: string
+                when:
+                  type: string
+              additionalProperties: false
+
+    Event_SystemServiceRestored:
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [system.service_restored]
+            params:
+              type: object
+              required: [affectedService]
+              properties:
+                affectedService:
+                  type: string
+              additionalProperties: false
