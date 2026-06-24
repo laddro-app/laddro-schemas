@@ -38,7 +38,17 @@
     "./inbox": {
       "types": "./dist/inbox.gen.d.ts",
       "default": "./dist/inbox.gen.js"
-    }
+    },
+    "./json/resume": {
+      "types": "./dist/json/resume.d.ts",
+      "default": "./dist/json/resume.js"
+    },
+    "./json/cover-letter": {
+      "types": "./dist/json/cover-letter.d.ts",
+      "default": "./dist/json/cover-letter.js"
+    },
+    "./json/resume.schema.json": "./dist/json/resume.schema.json",
+    "./json/cover-letter.schema.json": "./dist/json/cover-letter.schema.json"
   },
   "files": [
     "dist"
@@ -48,13 +58,17 @@
     "access": "public"
   },
   "scripts": {
-    "generate": "bash ../scripts/generate-ts.sh",
-    "build": "tsc -p tsconfig.json",
+    "generate": "bash ../scripts/generate-ts.sh && npm run generate:json",
+    "generate:json": "node ../scripts/generate-json-schema.mjs",
+    "build": "tsc -p tsconfig.json && npm run generate:json",
     "prepublishOnly": "npm run generate && npm run build"
   },
   "devDependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
     "openapi-typescript": "^7.0.0",
-    "typescript": "^5.5.0"
+    "typescript": "^5.5.0",
+    "yaml": "^2.5.0"
   },
   "repository": {
     "type": "git",
