@@ -439,6 +439,21 @@ func (e EventDocumentDownloadReadyKind) Valid() bool {
 	}
 }
 
+// Defines values for EventDocumentReviewCommentReceivedKind.
+const (
+	DocumentReviewCommentReceived EventDocumentReviewCommentReceivedKind = "document.review_comment_received"
+)
+
+// Valid indicates whether the value is a known member of the EventDocumentReviewCommentReceivedKind enum.
+func (e EventDocumentReviewCommentReceivedKind) Valid() bool {
+	switch e {
+	case DocumentReviewCommentReceived:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for EventDocumentSharedByYouKind.
 const (
 	DocumentSharedByYou EventDocumentSharedByYouKind = "document.shared_by_you"
@@ -929,6 +944,7 @@ const (
 	InboxKindCreditsMonthlyReset              InboxKind = "credits.monthly_reset"
 	InboxKindDocumentAiComplete               InboxKind = "document.ai_complete"
 	InboxKindDocumentDownloadReady            InboxKind = "document.download_ready"
+	InboxKindDocumentReviewCommentReceived    InboxKind = "document.review_comment_received"
 	InboxKindDocumentSharedByYou              InboxKind = "document.shared_by_you"
 	InboxKindDocumentTailorComplete           InboxKind = "document.tailor_complete"
 	InboxKindDocumentTailorCompleteFailed     InboxKind = "document.tailor_complete_failed"
@@ -1010,6 +1026,8 @@ func (e InboxKind) Valid() bool {
 	case InboxKindDocumentAiComplete:
 		return true
 	case InboxKindDocumentDownloadReady:
+		return true
+	case InboxKindDocumentReviewCommentReceived:
 		return true
 	case InboxKindDocumentSharedByYou:
 		return true
@@ -1439,6 +1457,22 @@ type EventDocumentDownloadReady struct {
 
 // EventDocumentDownloadReadyKind defines model for EventDocumentDownloadReady.Kind.
 type EventDocumentDownloadReadyKind string
+
+// EventDocumentReviewCommentReceived defines model for Event_DocumentReviewCommentReceived.
+type EventDocumentReviewCommentReceived struct {
+	Kind   EventDocumentReviewCommentReceivedKind `json:"kind"`
+	Params struct {
+		CareerSiteId string `json:"careerSiteId"`
+		CommentCount int    `json:"commentCount"`
+		ResumeTitle  string `json:"resumeTitle"`
+		ReviewerName string `json:"reviewerName"`
+	} `json:"params"`
+	RouteParams *map[string]string `json:"routeParams,omitempty"`
+	UserId      openapi_types.UUID `json:"userId"`
+}
+
+// EventDocumentReviewCommentReceivedKind defines model for EventDocumentReviewCommentReceived.Kind.
+type EventDocumentReviewCommentReceivedKind string
 
 // EventDocumentSharedByYou defines model for Event_DocumentSharedByYou.
 type EventDocumentSharedByYou struct {
@@ -2596,6 +2630,32 @@ func (t *InboxEventInput) FromEventDocumentViewedByVisitor(v EventDocumentViewed
 
 // MergeEventDocumentViewedByVisitor performs a merge with any union data inside the InboxEventInput, using the provided EventDocumentViewedByVisitor
 func (t *InboxEventInput) MergeEventDocumentViewedByVisitor(v EventDocumentViewedByVisitor) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsEventDocumentReviewCommentReceived returns the union data inside the InboxEventInput as a EventDocumentReviewCommentReceived
+func (t InboxEventInput) AsEventDocumentReviewCommentReceived() (EventDocumentReviewCommentReceived, error) {
+	var body EventDocumentReviewCommentReceived
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromEventDocumentReviewCommentReceived overwrites any union data inside the InboxEventInput as the provided EventDocumentReviewCommentReceived
+func (t *InboxEventInput) FromEventDocumentReviewCommentReceived(v EventDocumentReviewCommentReceived) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeEventDocumentReviewCommentReceived performs a merge with any union data inside the InboxEventInput, using the provided EventDocumentReviewCommentReceived
+func (t *InboxEventInput) MergeEventDocumentReviewCommentReceived(v EventDocumentReviewCommentReceived) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err

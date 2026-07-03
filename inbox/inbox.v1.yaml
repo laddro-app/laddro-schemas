@@ -70,6 +70,7 @@ components:
         - document.download_ready
         - document.shared_by_you
         - document.viewed_by_visitor
+        - document.review_comment_received
         # tracker
         - tracker.application_reminder
         - tracker.interview_scheduled
@@ -137,6 +138,7 @@ components:
         - $ref: '#/components/schemas/Event_DocumentDownloadReady'
         - $ref: '#/components/schemas/Event_DocumentSharedByYou'
         - $ref: '#/components/schemas/Event_DocumentViewedByVisitor'
+        - $ref: '#/components/schemas/Event_DocumentReviewCommentReceived'
         - $ref: '#/components/schemas/Event_TrackerApplicationReminder'
         - $ref: '#/components/schemas/Event_TrackerInterviewScheduled'
         - $ref: '#/components/schemas/Event_TrackerFollowupDue'
@@ -772,6 +774,37 @@ components:
               required: [visitorLocation]
               properties:
                 visitorLocation:
+                  type: string
+              additionalProperties: false
+
+    Event_DocumentReviewCommentReceived:
+      description: |
+        A reviewer left one or more comments on the user's online resume.
+        This kind is AGGREGATED by the pipeline: the backend supplies an
+        `aggregationKey` on the envelope (never a param) so repeat comments
+        from the same reviewer on the same resume collapse into one inbox
+        row and refresh its `commentCount` instead of stacking new rows.
+        `commentCount` is the cumulative count computed by the backend at
+        publish time (single source of truth).
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          required: [kind, params]
+          properties:
+            kind:
+              type: string
+              enum: [document.review_comment_received]
+            params:
+              type: object
+              required: [reviewerName, commentCount, resumeTitle, careerSiteId]
+              properties:
+                reviewerName:
+                  type: string
+                commentCount:
+                  type: integer
+                resumeTitle:
+                  type: string
+                careerSiteId:
                   type: string
               additionalProperties: false
 
