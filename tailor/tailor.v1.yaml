@@ -85,7 +85,7 @@ components:
           description: Raw job description as the user pasted it.
         locale:
           type: string
-          enum: [en, de, es, fr, it, nl, pl, pt, is, fi, sv, no, da, et, ro, cs]
+          enum: [en, de, es, fr, it, nl, pl, pt, is, fi, sv, no, da, et, ro, cs, sk, hu, lt, lv, uk]
 
     WorkerAnalyzeResponse:
       $ref: '#/components/schemas/JobDescription'
@@ -99,7 +99,7 @@ components:
           description: The original input, preserved verbatim for source-span lookups.
         locale:
           type: string
-          enum: [en, de, es, fr, it, nl, pl, pt, is, fi, sv, no, da, et, ro, cs]
+          enum: [en, de, es, fr, it, nl, pl, pt, is, fi, sv, no, da, et, ro, cs, sk, hu, lt, lv, uk]
         title:
           type: string
           description: |
@@ -260,7 +260,7 @@ components:
           description: Raw JD text. The worker parses it.
         locale:
           type: string
-          enum: [en, de, es, fr, it, nl, pl, pt, is, fi, sv, no, da, et, ro, cs]
+          enum: [en, de, es, fr, it, nl, pl, pt, is, fi, sv, no, da, et, ro, cs, sk, hu, lt, lv, uk]
 
     TailorResponse:
       type: object
@@ -511,7 +511,7 @@ components:
             $ref: '#/components/schemas/Evidence'
         locale:
           type: string
-          enum: [en, de, es, fr, it, nl, pl, pt, is, fi, sv, no, da, et, ro, cs]
+          enum: [en, de, es, fr, it, nl, pl, pt, is, fi, sv, no, da, et, ro, cs, sk, hu, lt, lv, uk]
 
     Evidence:
       type: object
@@ -803,7 +803,7 @@ components:
           minLength: 1
         locale:
           type: string
-          enum: [en, de, es, fr, it, nl, pl, pt, is, fi, sv, no, da, et, ro, cs]
+          enum: [en, de, es, fr, it, nl, pl, pt, is, fi, sv, no, da, et, ro, cs, sk, hu, lt, lv, uk]
         company:
           type: string
           description: |
