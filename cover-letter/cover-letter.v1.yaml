@@ -83,14 +83,62 @@ components:
         companyName:       { type: string }
         hiringManagerName: { type: string }
 
+    TemplateColors:
+      type: object
+      description: |
+        A complete template colour palette — the five slots every template
+        renders. One row of a cover-letter template's `availableColors` in the
+        renderer catalog, stored verbatim so the choice round-trips exactly.
+
+        Duplicated from `resume.v1.yaml` rather than referenced: each spec is
+        generated independently (see `scripts/generate-ts.sh`), so a cross-file
+        `$ref` would not resolve. Keep the two definitions identical.
+
+        All five are REQUIRED when the object is present — present means
+        complete. Omit the whole object to accept the template's default
+        palette.
+      required:
+        - backgroundColor
+        - backgroundPartColor
+        - underlineColor
+        - text
+        - textMuted
+      properties:
+        backgroundColor:
+          type: string
+          pattern: '^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$'
+          example: '#ffffff'
+        backgroundPartColor:
+          type: string
+          pattern: '^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$'
+          example: '#0F6B4F'
+        underlineColor:
+          type: string
+          pattern: '^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$'
+          example: '#1a1a1a'
+        text:
+          type: string
+          pattern: '^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$'
+          example: '#1a1a1a'
+        textMuted:
+          type: string
+          pattern: '^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$'
+          example: '#2d2d2d'
+
     CoverLetterStyling:
       type: object
       description: |
         Cover letter visual settings. All fields optional — template defaults
         apply when omitted.
       properties:
+        colors:
+          $ref: '#/components/schemas/TemplateColors'
         color:
           type: string
+          description: |
+            DEPRECATED as an input, still written for backwards compatibility.
+            Readers MUST prefer `colors`; see the note on
+            `resume.v1.yaml#/components/schemas/Styling/properties/color`.
           example: '#0F6B4F'
         font:
           type: string
