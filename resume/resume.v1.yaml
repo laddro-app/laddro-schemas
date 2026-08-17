@@ -340,6 +340,54 @@ components:
       example: '2024-03'
       description: Month precision (YYYY-MM). Use null endDate + current=true for ongoing entries.
 
+    TemplateColors:
+      type: object
+      description: |
+        A complete template colour palette — the five slots every template
+        renders. This is one row of a template's `availableColors` in the
+        renderer catalog, stored verbatim so the choice round-trips exactly.
+
+        All five are REQUIRED when the object is present. A partial palette is
+        what the single-hex `Styling.color` already is, and mixing a partial
+        palette with template defaults is what made saved colours unreadable:
+        the reader could not tell an intentional slot from an omitted one.
+        Present means complete; omit the whole object to accept the
+        template's default palette.
+
+        Slot meanings, as the templates use them:
+          backgroundColor      page fill, or the sidebar fill on two-column layouts
+          backgroundPartColor  accent panels and filled blocks
+          underlineColor       section dividers and rules
+          text                 body text
+          textMuted            secondary text (dates, locations, meta)
+      required:
+        - backgroundColor
+        - backgroundPartColor
+        - underlineColor
+        - text
+        - textMuted
+      properties:
+        backgroundColor:
+          type: string
+          pattern: '^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$'
+          example: '#ffffff'
+        backgroundPartColor:
+          type: string
+          pattern: '^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$'
+          example: '#0F6B4F'
+        underlineColor:
+          type: string
+          pattern: '^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$'
+          example: '#1a1a1a'
+        text:
+          type: string
+          pattern: '^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$'
+          example: '#1a1a1a'
+        textMuted:
+          type: string
+          pattern: '^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$'
+          example: '#2d2d2d'
+
     Styling:
       type: object
       description: |
@@ -347,9 +395,24 @@ components:
         applies when omitted. Backend persists this as part of the encrypted
         resume content.
       properties:
+        colors:
+          $ref: '#/components/schemas/TemplateColors'
         color:
           type: string
-          description: Hex color override. Falls back to the template's default palette.
+          description: |
+            DEPRECATED as an input, still written for backwards compatibility.
+
+            A single accent hex. Readers MUST prefer `colors` when present and
+            fall back to this only for documents saved before `colors` existed.
+            Writers should emit both, with `color` mirroring
+            `colors.backgroundPartColor`.
+
+            On its own this cannot express a palette: it carries no
+            `backgroundColor`, `text` or `textMuted`, and readers historically
+            applied it to `backgroundPartColor` AND `underlineColor` at once,
+            so any palette whose divider differs from its accent came back
+            wrong. Keep writing it so older clients still get an accent; keep
+            reading it so older documents still resolve.
           example: '#0F6B4F'
         font:
           type: string
