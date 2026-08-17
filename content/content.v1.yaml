@@ -64,7 +64,7 @@ components:
             already mentions it.
         locale:
           type: string
-          enum: [en, de, es, fr, it, nl, pl, pt, is, fi, sv, no, da, et, ro, cs]
+          enum: [en, de, es, fr, it, nl, pl, pt, is, fi, sv, no, da, et, ro, cs, sk, hu, lt, lv, uk]
           description: |
             Drives prompt language for Gemini and which slice of
             `improve_selections` is consulted for the cache hit. No English
@@ -224,7 +224,7 @@ components:
           minLength: 1
         locale:
           type: string
-          enum: [en, de, es, fr, it, nl, pl, pt, is, fi, sv, no, da, et, ro, cs]
+          enum: [en, de, es, fr, it, nl, pl, pt, is, fi, sv, no, da, et, ro, cs, sk, hu, lt, lv, uk]
 
     ContentScoreResponse:
       type: object
