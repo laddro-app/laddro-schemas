@@ -29,8 +29,10 @@ bullets/
 scripts/
   generate-ts.sh                       runs openapi-typescript
   generate-go.sh                       runs oapi-codegen
+  generate-kotlin.mjs                  emits kotlinx.serialization data classes
 ts/                                    TS package — published as @laddro-app/schemas
 go/                                    Go module — github.com/laddro-app/laddro-schemas/go
+kotlin/                                Gradle module — com.laddro:schemas (laddro-android)
 ```
 
 ## Consuming
@@ -71,11 +73,38 @@ var r resume.Resume
 var jd tailor.JobDescription
 ```
 
+### Kotlin (laddro-android)
+
+The Android app builds its models from here rather than hand-writing them the
+way iOS did (`ApiModels.swift` is 82KB of hand-maintained contract).
+
+```kotlin
+import com.laddro.schemas.resume.Resume
+import com.laddro.schemas.tailor.JobDescription
+```
+
+Plain `@Serializable` data classes and enums, nothing else. No Retrofit
+interfaces and no generated client: the Android app owns its own network layer.
+The only dependency is `kotlinx-serialization-json`.
+
+Two deliberate choices:
+
+- **Dates are `String`.** The backend serialises dates with `toString`, not ISO
+  8601, so mapping `format: date-time` onto `Instant` would make every such
+  field fail to parse and silently vanish. Parse explicitly at the call site.
+- **`oneOf` / `anyOf` / `allOf` become `JsonElement`.** The specs carry no
+  discriminator, so there is no honest single data class for a union. The call
+  site narrows it.
+
+> Not yet published to a Maven repository. Until that is decided, the module is
+> consumed from source. See `kotlin/build.gradle.kts`.
+
 ## Regenerating locally
 
 ```bash
 bash scripts/generate-ts.sh
 bash scripts/generate-go.sh
+node scripts/generate-kotlin.mjs
 ```
 
 ## Fixtures
