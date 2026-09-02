@@ -3,7 +3,7 @@
 
 package com.laddro.schemas.tailor
 
-import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 
 /**
  * Discriminated union pointing at the exact Resume object a Suggestion
@@ -12,5 +12,4 @@ import kotlinx.serialization.Serializable
  *   rewrite_summary             → SummaryTarget  (scope=summary)
  *   add_skill                   → SkillTarget    (scope=skill)
  */
-@Serializable
-class SuggestionTarget
+typealias SuggestionTarget = JsonElement

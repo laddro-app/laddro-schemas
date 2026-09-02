@@ -3,7 +3,6 @@
 
 package com.laddro.schemas.resume
 
-import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 
-@Serializable
-class ReorderableSection
+typealias ReorderableSection = JsonElement

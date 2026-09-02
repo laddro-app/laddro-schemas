@@ -3,7 +3,7 @@
 
 package com.laddro.schemas.inbox
 
-import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 
 /**
  * A reviewer left one or more comments on the user's online resume.
@@ -14,5 +14,4 @@ import kotlinx.serialization.Serializable
  * `commentCount` is the cumulative count computed by the backend at
  * publish time (single source of truth).
  */
-@Serializable
-class EventDocumentReviewCommentReceived
+typealias EventDocumentReviewCommentReceived = JsonElement

@@ -3,7 +3,6 @@
 
 package com.laddro.schemas.inbox
 
-import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 
-@Serializable
-class EventLegalCookieUpdated
+typealias EventLegalCookieUpdated = JsonElement

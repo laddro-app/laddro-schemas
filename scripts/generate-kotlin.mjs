@@ -148,6 +148,66 @@ function renderEnum(name, schema) {
   return lines.join("\n");
 }
 
+/**
+ * A NAMED schema that is not an object must not become a class.
+ *
+ * `renderClass` emits `class Name` for anything with no `properties`, which is
+ * right for a genuinely empty object and catastrophic for everything else. A
+ * named `type: string` became an empty class that encodes to `{}` and cannot
+ * decode `"2024-03"`, and a named `oneOf` became an empty class that erased
+ * whichever variant it wrapped. Both compiled cleanly and silently destroyed
+ * data on the first save — `MonthDate` would have dropped every start and end
+ * date on a resume, and `ReorderableSection` would have flattened every
+ * employment and education block to `{}`.
+ *
+ * `kotlinType` already resolves these shapes correctly for PROPERTIES; this
+ * routes top-level declarations through the same understanding. Returns null
+ * when the schema really is an object, leaving `renderClass` to handle it.
+ */
+function renderAlias(name, schema) {
+  if (!schema || typeof schema !== "object") return null;
+  if (schema.properties && Object.keys(schema.properties).length > 0) return null;
+  if (Array.isArray(schema.enum)) return null;
+
+  // A bare $ref at the top level is an alias for another named schema, not a
+  // new shape. Emitting a class for it produced an empty one.
+  if (schema.$ref) {
+    return [...kdoc(schema.description), `typealias ${name} = ${refName(schema.$ref)}`].join("\n");
+  }
+
+  // A union carries no discriminator in these specs, so there is no honest
+  // single data class for it. The call site narrows the JsonElement.
+  if (schema.oneOf || schema.anyOf || schema.allOf) {
+    return [...kdoc(schema.description), `typealias ${name} = JsonElement`].join("\n");
+  }
+
+  const scalar = {
+    string: "String",
+    integer: "Int",
+    number: "Double",
+    boolean: "Boolean",
+  }[schema.type];
+
+  if (scalar) {
+    return [...kdoc(schema.description), `typealias ${name} = ${scalar}`].join("\n");
+  }
+
+  if (schema.type === "array") {
+    return [
+      ...kdoc(schema.description),
+      `typealias ${name} = List<${kotlinType(schema.items, name, "item")}>`,
+    ].join("\n");
+  }
+
+  // An object with no declared properties is legitimately an open map rather
+  // than an empty class: the backend sends keys this spec does not enumerate.
+  if (schema.type === "object" || schema.additionalProperties) {
+    return [...kdoc(schema.description), `typealias ${name} = JsonObject`].join("\n");
+  }
+
+  return null;
+}
+
 function renderClass(name, schema) {
   const required = new Set(schema.required ?? []);
   const properties = Object.entries(schema.properties ?? {});
@@ -211,7 +271,7 @@ for (const [specPath, packageName] of SPECS) {
     const primary =
       schema.type === "string" && Array.isArray(schema.enum)
         ? renderEnum(name, schema)
-        : renderClass(name, schema);
+        : renderAlias(name, schema) ?? renderClass(name, schema);
 
     const body = [primary, ...pendingTypes].join("\n\n");
 
