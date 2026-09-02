@@ -3,12 +3,11 @@
 
 package com.laddro.schemas.inbox
 
-import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 
 /**
  * Discriminated union of every inbox event a backend can publish.
  * Callers use this type. The transport layer wraps it in an
  * `InboxEnvelope` before publishing.
  */
-@Serializable
-class InboxEventInput
+typealias InboxEventInput = JsonElement

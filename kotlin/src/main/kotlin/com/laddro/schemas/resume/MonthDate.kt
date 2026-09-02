@@ -3,10 +3,8 @@
 
 package com.laddro.schemas.resume
 
-import kotlinx.serialization.Serializable
 
 /**
  * Month precision (YYYY-MM). Use null endDate + current=true for ongoing entries.
  */
-@Serializable
-class MonthDate
+typealias MonthDate = String

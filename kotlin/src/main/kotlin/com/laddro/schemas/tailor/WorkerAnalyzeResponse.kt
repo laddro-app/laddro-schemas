@@ -3,7 +3,5 @@
 
 package com.laddro.schemas.tailor
 
-import kotlinx.serialization.Serializable
 
-@Serializable
-class WorkerAnalyzeResponse
+typealias WorkerAnalyzeResponse = JobDescription
