@@ -3,7 +3,16 @@
 
 package com.laddro.schemas.tailor
 
-import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.JsonEncoder
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 /**
  * Discriminated union pointing at the exact Resume object a Suggestion
@@ -12,4 +21,87 @@ import kotlinx.serialization.json.JsonElement
  *   rewrite_summary             → SummaryTarget  (scope=summary)
  *   add_skill                   → SkillTarget    (scope=skill)
  */
-typealias SuggestionTarget = JsonElement
+@Serializable(with = SuggestionTargetSerializer::class)
+sealed interface SuggestionTarget {
+
+    /** The schema discriminator, which is also the variant's identity. */
+    val scope: String
+
+    data class Bullet(val value: BulletTarget) : SuggestionTarget {
+        override val scope: String get() = BULLET
+    }
+
+    data class Summary(val value: SummaryTarget) : SuggestionTarget {
+        override val scope: String get() = SUMMARY
+    }
+
+    data class Skill(val value: SkillTarget) : SuggestionTarget {
+        override val scope: String get() = SKILL
+    }
+
+    /**
+     * A variant this build does not model, kept verbatim. Never constructed
+     * by hand; only ever produced by decoding.
+     */
+    data class Unknown(val raw: JsonObject) : SuggestionTarget {
+        override val scope: String
+            get() = raw[DISCRIMINATOR]?.jsonPrimitive?.content.orEmpty()
+    }
+
+    companion object {
+        const val DISCRIMINATOR: String = "scope"
+        const val BULLET: String = "bullet"
+        const val SUMMARY: String = "summary"
+        const val SKILL: String = "skill"
+    }
+}
+
+/**
+ * Routes [SuggestionTarget] on its discriminator, reading and writing the FLAT object
+ * the backend and the renderer both speak.
+ *
+ * JSON-only by construction: it needs the raw element to route before it
+ * knows which variant serializer to call, and to hand an Unknown back
+ * untouched.
+ */
+object SuggestionTargetSerializer : KSerializer<SuggestionTarget> {
+
+    // Borrowed from JsonObject rather than built with
+    // buildClassSerialDescriptor, which is internal API. Nothing reads it:
+    // the codec goes through JsonDecoder / JsonEncoder and bypasses it.
+    override val descriptor: SerialDescriptor = JsonObject.serializer().descriptor
+
+    override fun deserialize(decoder: Decoder): SuggestionTarget {
+        val input = requireNotNull(decoder as? JsonDecoder) {
+            "SuggestionTarget can only be read from JSON"
+        }
+        val element = input.decodeJsonElement().jsonObject
+        val discriminator = element[SuggestionTarget.DISCRIMINATOR]?.jsonPrimitive?.content
+
+        return when (discriminator) {
+            SuggestionTarget.BULLET ->
+                SuggestionTarget.Bullet(input.json.decodeFromJsonElement(BulletTarget.serializer(), element))
+            SuggestionTarget.SUMMARY ->
+                SuggestionTarget.Summary(input.json.decodeFromJsonElement(SummaryTarget.serializer(), element))
+            SuggestionTarget.SKILL ->
+                SuggestionTarget.Skill(input.json.decodeFromJsonElement(SkillTarget.serializer(), element))
+            else -> SuggestionTarget.Unknown(element)
+        }
+    }
+
+    override fun serialize(encoder: Encoder, value: SuggestionTarget) {
+        val output = requireNotNull(encoder as? JsonEncoder) {
+            "SuggestionTarget can only be written as JSON"
+        }
+        val element = when (value) {
+            is SuggestionTarget.Bullet ->
+                output.json.encodeToJsonElement(BulletTarget.serializer(), value.value)
+            is SuggestionTarget.Summary ->
+                output.json.encodeToJsonElement(SummaryTarget.serializer(), value.value)
+            is SuggestionTarget.Skill ->
+                output.json.encodeToJsonElement(SkillTarget.serializer(), value.value)
+            is SuggestionTarget.Unknown -> value.raw
+        }
+        output.encodeJsonElement(element)
+    }
+}
