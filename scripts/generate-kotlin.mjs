@@ -175,8 +175,15 @@ function renderAlias(name, schema) {
     return [...kdoc(schema.description), `typealias ${name} = ${refName(schema.$ref)}`].join("\n");
   }
 
-  // A union carries no discriminator in these specs, so there is no honest
-  // single data class for it. The call site narrows the JsonElement.
+  // A union WITH a discriminator is expressible as a sealed hierarchy, and
+  // should be: it is the difference between the call site pattern-matching on
+  // a type it understands and hand-parsing a JsonElement everywhere.
+  if (schema.oneOf && schema.discriminator?.mapping) {
+    return renderSealedUnion(name, schema);
+  }
+
+  // Without one there is no honest single data class, because nothing says
+  // which variant a payload is. The call site narrows the JsonElement.
   if (schema.oneOf || schema.anyOf || schema.allOf) {
     return [...kdoc(schema.description), `typealias ${name} = JsonElement`].join("\n");
   }
@@ -206,6 +213,135 @@ function renderAlias(name, schema) {
   }
 
   return null;
+}
+
+/** SCREAMING_SNAKE constant name for a discriminator value. */
+function constantName(value) {
+  return String(value)
+    .replace(/([a-z0-9])([A-Z])/g, "$1_$2")
+    .replace(/[^A-Za-z0-9]+/g, "_")
+    .toUpperCase();
+}
+
+/**
+ * A discriminated `oneOf` as a sealed interface plus a routing serializer.
+ *
+ * The wire shape is FLAT — `{"type":"employment","items":[…]}` — not a wrapper
+ * object, so the serializer reads the discriminator off the raw element before
+ * choosing which variant serializer to run.
+ *
+ * An `Unknown` variant keeps any payload this build does not model, verbatim.
+ * Round-tripping has to be lossless in both directions: a section type added by
+ * the web app or a newer schema must survive an edit by an older client rather
+ * than being silently dropped by it.
+ */
+function renderSealedUnion(name, schema) {
+  const mapping = Object.entries(schema.discriminator.mapping);
+  const property = schema.discriminator.propertyName ?? "type";
+  const serializerName = `${name}Serializer`;
+
+  const variants = mapping.map(([value, ref]) => ({
+    value,
+    constant: constantName(value),
+    variant: pascal(value),
+    target: refName(ref),
+  }));
+
+  const lines = [
+    ...kdoc(schema.description),
+    `@Serializable(with = ${serializerName}::class)`,
+    `sealed interface ${name} {`,
+    ``,
+    `    /** The schema discriminator, which is also the variant's identity. */`,
+    `    val ${propertyName(property)}: String`,
+    ``,
+  ];
+
+  for (const v of variants) {
+    lines.push(
+      `    data class ${v.variant}(val value: ${v.target}) : ${name} {`,
+      `        override val ${propertyName(property)}: String get() = ${v.constant}`,
+      `    }`,
+      ``,
+    );
+  }
+
+  lines.push(
+    `    /**`,
+    `     * A variant this build does not model, kept verbatim. Never constructed`,
+    `     * by hand; only ever produced by decoding.`,
+    `     */`,
+    `    data class Unknown(val raw: JsonObject) : ${name} {`,
+    `        override val ${propertyName(property)}: String`,
+    `            get() = raw[DISCRIMINATOR]?.jsonPrimitive?.content.orEmpty()`,
+    `    }`,
+    ``,
+    `    companion object {`,
+    `        const val DISCRIMINATOR: String = ${JSON.stringify(property)}`,
+  );
+  for (const v of variants) {
+    lines.push(`        const val ${v.constant}: String = ${JSON.stringify(v.value)}`);
+  }
+  lines.push(`    }`, `}`, ``);
+
+  // The serializer.
+  lines.push(
+    `/**`,
+    ` * Routes [${name}] on its discriminator, reading and writing the FLAT object`,
+    ` * the backend and the renderer both speak.`,
+    ` *`,
+    ` * JSON-only by construction: it needs the raw element to route before it`,
+    ` * knows which variant serializer to call, and to hand an Unknown back`,
+    ` * untouched.`,
+    ` */`,
+    `object ${serializerName} : KSerializer<${name}> {`,
+    ``,
+    `    // Borrowed from JsonObject rather than built with`,
+    `    // buildClassSerialDescriptor, which is internal API. Nothing reads it:`,
+    `    // the codec goes through JsonDecoder / JsonEncoder and bypasses it.`,
+    `    override val descriptor: SerialDescriptor = JsonObject.serializer().descriptor`,
+    ``,
+    `    override fun deserialize(decoder: Decoder): ${name} {`,
+    `        val input = requireNotNull(decoder as? JsonDecoder) {`,
+    `            "${name} can only be read from JSON"`,
+    `        }`,
+    `        val element = input.decodeJsonElement().jsonObject`,
+    `        val discriminator = element[${name}.DISCRIMINATOR]?.jsonPrimitive?.content`,
+    ``,
+    `        return when (discriminator) {`,
+  );
+  for (const v of variants) {
+    lines.push(
+      `            ${name}.${v.constant} ->`,
+      `                ${name}.${v.variant}(input.json.decodeFromJsonElement(${v.target}.serializer(), element))`,
+    );
+  }
+  lines.push(
+    `            else -> ${name}.Unknown(element)`,
+    `        }`,
+    `    }`,
+    ``,
+    `    override fun serialize(encoder: Encoder, value: ${name}) {`,
+    `        val output = requireNotNull(encoder as? JsonEncoder) {`,
+    `            "${name} can only be written as JSON"`,
+    `        }`,
+    `        val element = when (value) {`,
+  );
+  for (const v of variants) {
+    lines.push(
+      `            is ${name}.${v.variant} ->`,
+      `                output.json.encodeToJsonElement(${v.target}.serializer(), value.value)`,
+    );
+  }
+  lines.push(
+    `            is ${name}.Unknown -> value.raw`,
+    `        }`,
+    `        output.encodeJsonElement(element)`,
+    `    }`,
+    `}`,
+  );
+
+  return lines.join("\n");
 }
 
 function renderClass(name, schema) {
@@ -283,6 +419,15 @@ for (const [specPath, packageName] of SPECS) {
       ["kotlinx.serialization.Serializable", /@Serializable\b/],
       ["kotlinx.serialization.json.JsonElement", /\bJsonElement\b/],
       ["kotlinx.serialization.json.JsonObject", /\bJsonObject\b/],
+      // Only a discriminated union pulls these in.
+      ["kotlinx.serialization.KSerializer", /\bKSerializer\b/],
+      ["kotlinx.serialization.descriptors.SerialDescriptor", /\bSerialDescriptor\b/],
+      ["kotlinx.serialization.encoding.Decoder", /\bDecoder\b/],
+      ["kotlinx.serialization.encoding.Encoder", /\bEncoder\b/],
+      ["kotlinx.serialization.json.JsonDecoder", /\bJsonDecoder\b/],
+      ["kotlinx.serialization.json.JsonEncoder", /\bJsonEncoder\b/],
+      ["kotlinx.serialization.json.jsonObject", /\.jsonObject\b/],
+      ["kotlinx.serialization.json.jsonPrimitive", /\.jsonPrimitive\b/],
     ]
       .filter(([, pattern]) => pattern.test(body))
       .map(([path]) => `import ${path}`);

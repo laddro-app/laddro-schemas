@@ -3,6 +3,152 @@
 
 package com.laddro.schemas.resume
 
-import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.JsonEncoder
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
-typealias ReorderableSection = JsonElement
+@Serializable(with = ReorderableSectionSerializer::class)
+sealed interface ReorderableSection {
+
+    /** The schema discriminator, which is also the variant's identity. */
+    val type: String
+
+    data class Employment(val value: EmploymentSection) : ReorderableSection {
+        override val type: String get() = EMPLOYMENT
+    }
+
+    data class Education(val value: EducationSection) : ReorderableSection {
+        override val type: String get() = EDUCATION
+    }
+
+    data class Skills(val value: SkillsSection) : ReorderableSection {
+        override val type: String get() = SKILLS
+    }
+
+    data class Languages(val value: LanguagesSection) : ReorderableSection {
+        override val type: String get() = LANGUAGES
+    }
+
+    data class Certifications(val value: CertificationsSection) : ReorderableSection {
+        override val type: String get() = CERTIFICATIONS
+    }
+
+    data class Projects(val value: ProjectsSection) : ReorderableSection {
+        override val type: String get() = PROJECTS
+    }
+
+    data class References(val value: ReferencesSection) : ReorderableSection {
+        override val type: String get() = REFERENCES
+    }
+
+    data class ExtraCurricularActivities(val value: ExtraCurricularActivitiesSection) : ReorderableSection {
+        override val type: String get() = EXTRA_CURRICULAR_ACTIVITIES
+    }
+
+    data class Custom(val value: CustomSection) : ReorderableSection {
+        override val type: String get() = CUSTOM
+    }
+
+    /**
+     * A variant this build does not model, kept verbatim. Never constructed
+     * by hand; only ever produced by decoding.
+     */
+    data class Unknown(val raw: JsonObject) : ReorderableSection {
+        override val type: String
+            get() = raw[DISCRIMINATOR]?.jsonPrimitive?.content.orEmpty()
+    }
+
+    companion object {
+        const val DISCRIMINATOR: String = "type"
+        const val EMPLOYMENT: String = "employment"
+        const val EDUCATION: String = "education"
+        const val SKILLS: String = "skills"
+        const val LANGUAGES: String = "languages"
+        const val CERTIFICATIONS: String = "certifications"
+        const val PROJECTS: String = "projects"
+        const val REFERENCES: String = "references"
+        const val EXTRA_CURRICULAR_ACTIVITIES: String = "extraCurricularActivities"
+        const val CUSTOM: String = "custom"
+    }
+}
+
+/**
+ * Routes [ReorderableSection] on its discriminator, reading and writing the FLAT object
+ * the backend and the renderer both speak.
+ *
+ * JSON-only by construction: it needs the raw element to route before it
+ * knows which variant serializer to call, and to hand an Unknown back
+ * untouched.
+ */
+object ReorderableSectionSerializer : KSerializer<ReorderableSection> {
+
+    // Borrowed from JsonObject rather than built with
+    // buildClassSerialDescriptor, which is internal API. Nothing reads it:
+    // the codec goes through JsonDecoder / JsonEncoder and bypasses it.
+    override val descriptor: SerialDescriptor = JsonObject.serializer().descriptor
+
+    override fun deserialize(decoder: Decoder): ReorderableSection {
+        val input = requireNotNull(decoder as? JsonDecoder) {
+            "ReorderableSection can only be read from JSON"
+        }
+        val element = input.decodeJsonElement().jsonObject
+        val discriminator = element[ReorderableSection.DISCRIMINATOR]?.jsonPrimitive?.content
+
+        return when (discriminator) {
+            ReorderableSection.EMPLOYMENT ->
+                ReorderableSection.Employment(input.json.decodeFromJsonElement(EmploymentSection.serializer(), element))
+            ReorderableSection.EDUCATION ->
+                ReorderableSection.Education(input.json.decodeFromJsonElement(EducationSection.serializer(), element))
+            ReorderableSection.SKILLS ->
+                ReorderableSection.Skills(input.json.decodeFromJsonElement(SkillsSection.serializer(), element))
+            ReorderableSection.LANGUAGES ->
+                ReorderableSection.Languages(input.json.decodeFromJsonElement(LanguagesSection.serializer(), element))
+            ReorderableSection.CERTIFICATIONS ->
+                ReorderableSection.Certifications(input.json.decodeFromJsonElement(CertificationsSection.serializer(), element))
+            ReorderableSection.PROJECTS ->
+                ReorderableSection.Projects(input.json.decodeFromJsonElement(ProjectsSection.serializer(), element))
+            ReorderableSection.REFERENCES ->
+                ReorderableSection.References(input.json.decodeFromJsonElement(ReferencesSection.serializer(), element))
+            ReorderableSection.EXTRA_CURRICULAR_ACTIVITIES ->
+                ReorderableSection.ExtraCurricularActivities(input.json.decodeFromJsonElement(ExtraCurricularActivitiesSection.serializer(), element))
+            ReorderableSection.CUSTOM ->
+                ReorderableSection.Custom(input.json.decodeFromJsonElement(CustomSection.serializer(), element))
+            else -> ReorderableSection.Unknown(element)
+        }
+    }
+
+    override fun serialize(encoder: Encoder, value: ReorderableSection) {
+        val output = requireNotNull(encoder as? JsonEncoder) {
+            "ReorderableSection can only be written as JSON"
+        }
+        val element = when (value) {
+            is ReorderableSection.Employment ->
+                output.json.encodeToJsonElement(EmploymentSection.serializer(), value.value)
+            is ReorderableSection.Education ->
+                output.json.encodeToJsonElement(EducationSection.serializer(), value.value)
+            is ReorderableSection.Skills ->
+                output.json.encodeToJsonElement(SkillsSection.serializer(), value.value)
+            is ReorderableSection.Languages ->
+                output.json.encodeToJsonElement(LanguagesSection.serializer(), value.value)
+            is ReorderableSection.Certifications ->
+                output.json.encodeToJsonElement(CertificationsSection.serializer(), value.value)
+            is ReorderableSection.Projects ->
+                output.json.encodeToJsonElement(ProjectsSection.serializer(), value.value)
+            is ReorderableSection.References ->
+                output.json.encodeToJsonElement(ReferencesSection.serializer(), value.value)
+            is ReorderableSection.ExtraCurricularActivities ->
+                output.json.encodeToJsonElement(ExtraCurricularActivitiesSection.serializer(), value.value)
+            is ReorderableSection.Custom ->
+                output.json.encodeToJsonElement(CustomSection.serializer(), value.value)
+            is ReorderableSection.Unknown -> value.raw
+        }
+        output.encodeJsonElement(element)
+    }
+}
