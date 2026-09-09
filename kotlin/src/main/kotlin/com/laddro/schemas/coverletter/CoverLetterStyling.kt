@@ -3,6 +3,7 @@
 
 package com.laddro.schemas.coverletter
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -22,4 +23,56 @@ data class CoverLetterStyling(
     val fontSize: Int? = null,
     val margin: Double? = null,
     val lineHeight: Double? = null,
+    /**
+     * Structural letter format. Controls the STRUCTURE of the letter —
+     * address blocks, date style, subject line, sign-off convention —
+     * orthogonally to the visual template (`templateId`), which keeps
+     * owning colours, fonts and typography. Format × template must
+     * compose, never multiply. Optional; absent means `modern`.
+     *
+     * - `modern`: today's common international layout, the default for
+     *   everyone.
+     * - `us`: US business letter — strict full-block, US date,
+     *   "Sincerely".
+     * - `uk`: UK / Ireland — recipient name + address block, UK date,
+     *   Yours sincerely / Yours faithfully rule.
+     * - `de`: DIN 5008 (DE/AT/CH) — window-position recipient address,
+     *   right-aligned date, subject line.
+     * - `fr`: French formal — sender left, recipient right, place +
+     *   date, "Objet :" line, ceremonial closing.
+     *
+     * Clients MUST read the available formats and their labels from the
+     * renderer catalog rather than hardcoding this list.
+     */
+    val letterFormat: CoverLetterStylingLetterFormat? = null,
 )
+
+/**
+ * Structural letter format. Controls the STRUCTURE of the letter —
+ * address blocks, date style, subject line, sign-off convention —
+ * orthogonally to the visual template (`templateId`), which keeps
+ * owning colours, fonts and typography. Format × template must
+ * compose, never multiply. Optional; absent means `modern`.
+ *
+ * - `modern`: today's common international layout, the default for
+ *   everyone.
+ * - `us`: US business letter — strict full-block, US date,
+ *   "Sincerely".
+ * - `uk`: UK / Ireland — recipient name + address block, UK date,
+ *   Yours sincerely / Yours faithfully rule.
+ * - `de`: DIN 5008 (DE/AT/CH) — window-position recipient address,
+ *   right-aligned date, subject line.
+ * - `fr`: French formal — sender left, recipient right, place +
+ *   date, "Objet :" line, ceremonial closing.
+ *
+ * Clients MUST read the available formats and their labels from the
+ * renderer catalog rather than hardcoding this list.
+ */
+@Serializable
+enum class CoverLetterStylingLetterFormat {
+    @SerialName("modern") MODERN,
+    @SerialName("us") US,
+    @SerialName("uk") UK,
+    @SerialName("de") DE,
+    @SerialName("fr") FR,
+}

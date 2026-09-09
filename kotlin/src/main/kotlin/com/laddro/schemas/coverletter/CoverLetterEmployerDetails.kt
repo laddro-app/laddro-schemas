@@ -9,4 +9,9 @@ import kotlinx.serialization.Serializable
 data class CoverLetterEmployerDetails(
     val companyName: String? = null,
     val hiringManagerName: String? = null,
+    /**
+     * Employer postal address. Rendered in the recipient block by
+     * letter formats that show one (`uk`, `de`, `fr`).
+     */
+    val address: String? = null,
 )

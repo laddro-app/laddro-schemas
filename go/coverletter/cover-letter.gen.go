@@ -225,6 +225,33 @@ func (e CoverLetterGenerateResponseFilledPersonalDetails) Valid() bool {
 	}
 }
 
+// Defines values for CoverLetterStylingLetterFormat.
+const (
+	CoverLetterStylingLetterFormatDe     CoverLetterStylingLetterFormat = "de"
+	CoverLetterStylingLetterFormatFr     CoverLetterStylingLetterFormat = "fr"
+	CoverLetterStylingLetterFormatModern CoverLetterStylingLetterFormat = "modern"
+	CoverLetterStylingLetterFormatUk     CoverLetterStylingLetterFormat = "uk"
+	CoverLetterStylingLetterFormatUs     CoverLetterStylingLetterFormat = "us"
+)
+
+// Valid indicates whether the value is a known member of the CoverLetterStylingLetterFormat enum.
+func (e CoverLetterStylingLetterFormat) Valid() bool {
+	switch e {
+	case CoverLetterStylingLetterFormatDe:
+		return true
+	case CoverLetterStylingLetterFormatFr:
+		return true
+	case CoverLetterStylingLetterFormatModern:
+		return true
+	case CoverLetterStylingLetterFormatUk:
+		return true
+	case CoverLetterStylingLetterFormatUs:
+		return true
+	default:
+		return false
+	}
+}
+
 // CoverLetter defines model for CoverLetter.
 type CoverLetter struct {
 	Completeness *int                `json:"completeness,omitempty"`
@@ -258,6 +285,9 @@ type CoverLetterContent struct {
 
 // CoverLetterEmployerDetails defines model for CoverLetterEmployerDetails.
 type CoverLetterEmployerDetails struct {
+	// Address Employer postal address. Rendered in the recipient block by
+	// letter formats that show one (`uk`, `de`, `fr`).
+	Address           *string `json:"address,omitempty"`
 	CompanyName       *string `json:"companyName,omitempty"`
 	HiringManagerName *string `json:"hiringManagerName,omitempty"`
 }
@@ -396,12 +426,54 @@ type CoverLetterStyling struct {
 	// All five are REQUIRED when the object is present — present means
 	// complete. Omit the whole object to accept the template's default
 	// palette.
-	Colors     *TemplateColors `json:"colors,omitempty"`
-	Font       *string         `json:"font,omitempty"`
-	FontSize   *int            `json:"fontSize,omitempty"`
-	LineHeight *float32        `json:"lineHeight,omitempty"`
-	Margin     *float32        `json:"margin,omitempty"`
+	Colors   *TemplateColors `json:"colors,omitempty"`
+	Font     *string         `json:"font,omitempty"`
+	FontSize *int            `json:"fontSize,omitempty"`
+
+	// LetterFormat Structural letter format. Controls the STRUCTURE of the letter —
+	// address blocks, date style, subject line, sign-off convention —
+	// orthogonally to the visual template (`templateId`), which keeps
+	// owning colours, fonts and typography. Format × template must
+	// compose, never multiply. Optional; absent means `modern`.
+	//
+	// - `modern`: today's common international layout, the default for
+	//   everyone.
+	// - `us`: US business letter — strict full-block, US date,
+	//   "Sincerely".
+	// - `uk`: UK / Ireland — recipient name + address block, UK date,
+	//   Yours sincerely / Yours faithfully rule.
+	// - `de`: DIN 5008 (DE/AT/CH) — window-position recipient address,
+	//   right-aligned date, subject line.
+	// - `fr`: French formal — sender left, recipient right, place +
+	//   date, "Objet :" line, ceremonial closing.
+	//
+	// Clients MUST read the available formats and their labels from the
+	// renderer catalog rather than hardcoding this list.
+	LetterFormat *CoverLetterStylingLetterFormat `json:"letterFormat,omitempty"`
+	LineHeight   *float32                        `json:"lineHeight,omitempty"`
+	Margin       *float32                        `json:"margin,omitempty"`
 }
+
+// CoverLetterStylingLetterFormat Structural letter format. Controls the STRUCTURE of the letter —
+// address blocks, date style, subject line, sign-off convention —
+// orthogonally to the visual template (`templateId`), which keeps
+// owning colours, fonts and typography. Format × template must
+// compose, never multiply. Optional; absent means `modern`.
+//
+//   - `modern`: today's common international layout, the default for
+//     everyone.
+//   - `us`: US business letter — strict full-block, US date,
+//     "Sincerely".
+//   - `uk`: UK / Ireland — recipient name + address block, UK date,
+//     Yours sincerely / Yours faithfully rule.
+//   - `de`: DIN 5008 (DE/AT/CH) — window-position recipient address,
+//     right-aligned date, subject line.
+//   - `fr`: French formal — sender left, recipient right, place +
+//     date, "Objet :" line, ceremonial closing.
+//
+// Clients MUST read the available formats and their labels from the
+// renderer catalog rather than hardcoding this list.
+type CoverLetterStylingLetterFormat string
 
 // GenerationUsage Per-call usage block returned by ai-core for any LLM-backed endpoint.
 // Centralised in the cover-letter spec because that's the first place
