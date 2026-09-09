@@ -1098,14 +1098,18 @@ func (e InboxKind) Valid() bool {
 
 // BaseEvent defines model for BaseEvent.
 type BaseEvent struct {
-	RouteParams *map[string]string `json:"routeParams,omitempty"`
-	UserId      openapi_types.UUID `json:"userId"`
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string            `json:"aggregationKey,omitempty"`
+	RouteParams    *map[string]string `json:"routeParams,omitempty"`
+	UserId         openapi_types.UUID `json:"userId"`
 }
 
 // EventAccountConnectedAdded defines model for Event_AccountConnectedAdded.
 type EventAccountConnectedAdded struct {
-	Kind   EventAccountConnectedAddedKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                        `json:"aggregationKey,omitempty"`
+	Kind           EventAccountConnectedAddedKind `json:"kind"`
+	Params         struct {
 		Provider EventAccountConnectedAddedParamsProvider `json:"provider"`
 	} `json:"params"`
 	RouteParams *map[string]string `json:"routeParams,omitempty"`
@@ -1120,8 +1124,10 @@ type EventAccountConnectedAddedParamsProvider string
 
 // EventAccountConnectedRemoved defines model for Event_AccountConnectedRemoved.
 type EventAccountConnectedRemoved struct {
-	Kind   EventAccountConnectedRemovedKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                          `json:"aggregationKey,omitempty"`
+	Kind           EventAccountConnectedRemovedKind `json:"kind"`
+	Params         struct {
 		Provider EventAccountConnectedRemovedParamsProvider `json:"provider"`
 	} `json:"params"`
 	RouteParams *map[string]string `json:"routeParams,omitempty"`
@@ -1136,8 +1142,10 @@ type EventAccountConnectedRemovedParamsProvider string
 
 // EventAccountDeletionWarning defines model for Event_AccountDeletionWarning.
 type EventAccountDeletionWarning struct {
-	Kind   EventAccountDeletionWarningKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                         `json:"aggregationKey,omitempty"`
+	Kind           EventAccountDeletionWarningKind `json:"kind"`
+	Params         struct {
 		// RequestedOn Localized date string for when the deletion was requested.
 		RequestedOn *string `json:"requestedOn,omitempty"`
 
@@ -1153,10 +1161,12 @@ type EventAccountDeletionWarningKind string
 
 // EventAccountEmailVerified defines model for Event_AccountEmailVerified.
 type EventAccountEmailVerified struct {
-	Kind        EventAccountEmailVerifiedKind `json:"kind"`
-	Params      map[string]interface{}        `json:"params"`
-	RouteParams *map[string]string            `json:"routeParams,omitempty"`
-	UserId      openapi_types.UUID            `json:"userId"`
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                       `json:"aggregationKey,omitempty"`
+	Kind           EventAccountEmailVerifiedKind `json:"kind"`
+	Params         map[string]interface{}        `json:"params"`
+	RouteParams    *map[string]string            `json:"routeParams,omitempty"`
+	UserId         openapi_types.UUID            `json:"userId"`
 }
 
 // EventAccountEmailVerifiedKind defines model for EventAccountEmailVerified.Kind.
@@ -1164,10 +1174,12 @@ type EventAccountEmailVerifiedKind string
 
 // EventAccountPasswordChanged defines model for Event_AccountPasswordChanged.
 type EventAccountPasswordChanged struct {
-	Kind        EventAccountPasswordChangedKind `json:"kind"`
-	Params      map[string]interface{}          `json:"params"`
-	RouteParams *map[string]string              `json:"routeParams,omitempty"`
-	UserId      openapi_types.UUID              `json:"userId"`
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                         `json:"aggregationKey,omitempty"`
+	Kind           EventAccountPasswordChangedKind `json:"kind"`
+	Params         map[string]interface{}          `json:"params"`
+	RouteParams    *map[string]string              `json:"routeParams,omitempty"`
+	UserId         openapi_types.UUID              `json:"userId"`
 }
 
 // EventAccountPasswordChangedKind defines model for EventAccountPasswordChanged.Kind.
@@ -1175,10 +1187,12 @@ type EventAccountPasswordChangedKind string
 
 // EventAccountPasswordResetRequested defines model for Event_AccountPasswordResetRequested.
 type EventAccountPasswordResetRequested struct {
-	Kind        EventAccountPasswordResetRequestedKind `json:"kind"`
-	Params      map[string]interface{}                 `json:"params"`
-	RouteParams *map[string]string                     `json:"routeParams,omitempty"`
-	UserId      openapi_types.UUID                     `json:"userId"`
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                                `json:"aggregationKey,omitempty"`
+	Kind           EventAccountPasswordResetRequestedKind `json:"kind"`
+	Params         map[string]interface{}                 `json:"params"`
+	RouteParams    *map[string]string                     `json:"routeParams,omitempty"`
+	UserId         openapi_types.UUID                     `json:"userId"`
 }
 
 // EventAccountPasswordResetRequestedKind defines model for EventAccountPasswordResetRequested.Kind.
@@ -1186,8 +1200,10 @@ type EventAccountPasswordResetRequestedKind string
 
 // EventAccountWelcome defines model for Event_AccountWelcome.
 type EventAccountWelcome struct {
-	Kind   EventAccountWelcomeKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                 `json:"aggregationKey,omitempty"`
+	Kind           EventAccountWelcomeKind `json:"kind"`
+	Params         struct {
 		// Name User's full name. Optional — current template doesn't interpolate it but callers send it.
 		Name *string `json:"name,omitempty"`
 	} `json:"params"`
@@ -1200,8 +1216,10 @@ type EventAccountWelcomeKind string
 
 // EventBillingCancellationConfirmed defines model for Event_BillingCancellationConfirmed.
 type EventBillingCancellationConfirmed struct {
-	Kind   EventBillingCancellationConfirmedKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                               `json:"aggregationKey,omitempty"`
+	Kind           EventBillingCancellationConfirmedKind `json:"kind"`
+	Params         struct {
 		Plan string `json:"plan"`
 	} `json:"params"`
 	RouteParams *map[string]string `json:"routeParams,omitempty"`
@@ -1213,8 +1231,10 @@ type EventBillingCancellationConfirmedKind string
 
 // EventBillingCancellationScheduled defines model for Event_BillingCancellationScheduled.
 type EventBillingCancellationScheduled struct {
-	Kind   EventBillingCancellationScheduledKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                               `json:"aggregationKey,omitempty"`
+	Kind           EventBillingCancellationScheduledKind `json:"kind"`
+	Params         struct {
 		// EndDate Localized date the plan ends.
 		EndDate string  `json:"endDate"`
 		Plan    *string `json:"plan,omitempty"`
@@ -1229,8 +1249,10 @@ type EventBillingCancellationScheduledKind string
 
 // EventBillingCardExpiring defines model for Event_BillingCardExpiring.
 type EventBillingCardExpiring struct {
-	Kind   EventBillingCardExpiringKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                      `json:"aggregationKey,omitempty"`
+	Kind           EventBillingCardExpiringKind `json:"kind"`
+	Params         struct {
 		CardBrand   string `json:"cardBrand"`
 		CardLast4   string `json:"cardLast4"`
 		ExpiryDate  string `json:"expiryDate"`
@@ -1245,8 +1267,10 @@ type EventBillingCardExpiringKind string
 
 // EventBillingInvoiceAvailable defines model for Event_BillingInvoiceAvailable.
 type EventBillingInvoiceAvailable struct {
-	Kind   EventBillingInvoiceAvailableKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                          `json:"aggregationKey,omitempty"`
+	Kind           EventBillingInvoiceAvailableKind `json:"kind"`
+	Params         struct {
 		Period string `json:"period"`
 	} `json:"params"`
 	RouteParams *map[string]string `json:"routeParams,omitempty"`
@@ -1258,8 +1282,10 @@ type EventBillingInvoiceAvailableKind string
 
 // EventBillingPaymentFailed defines model for Event_BillingPaymentFailed.
 type EventBillingPaymentFailed struct {
-	Kind   EventBillingPaymentFailedKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                       `json:"aggregationKey,omitempty"`
+	Kind           EventBillingPaymentFailedKind `json:"kind"`
+	Params         struct {
 		Amount        *string `json:"amount,omitempty"`
 		CardBrand     *string `json:"cardBrand,omitempty"`
 		CardLast4     *string `json:"cardLast4,omitempty"`
@@ -1276,8 +1302,10 @@ type EventBillingPaymentFailedKind string
 
 // EventBillingPaymentSucceeded defines model for Event_BillingPaymentSucceeded.
 type EventBillingPaymentSucceeded struct {
-	Kind   EventBillingPaymentSucceededKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                          `json:"aggregationKey,omitempty"`
+	Kind           EventBillingPaymentSucceededKind `json:"kind"`
+	Params         struct {
 		// Amount Formatted amount with currency symbol — e.g. "€9.99".
 		Amount string `json:"amount"`
 
@@ -1306,8 +1334,10 @@ type EventBillingPaymentSucceededParamsPlanType string
 
 // EventBillingReactivated defines model for Event_BillingReactivated.
 type EventBillingReactivated struct {
-	Kind   EventBillingReactivatedKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                     `json:"aggregationKey,omitempty"`
+	Kind           EventBillingReactivatedKind `json:"kind"`
+	Params         struct {
 		NextRenewal string `json:"nextRenewal"`
 		Plan        string `json:"plan"`
 	} `json:"params"`
@@ -1320,8 +1350,10 @@ type EventBillingReactivatedKind string
 
 // EventBillingRefundIssued defines model for Event_BillingRefundIssued.
 type EventBillingRefundIssued struct {
-	Kind   EventBillingRefundIssuedKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                      `json:"aggregationKey,omitempty"`
+	Kind           EventBillingRefundIssuedKind `json:"kind"`
+	Params         struct {
 		Amount string `json:"amount"`
 	} `json:"params"`
 	RouteParams *map[string]string `json:"routeParams,omitempty"`
@@ -1333,8 +1365,10 @@ type EventBillingRefundIssuedKind string
 
 // EventBillingSubscriptionRenewed defines model for Event_BillingSubscriptionRenewed.
 type EventBillingSubscriptionRenewed struct {
-	Kind   EventBillingSubscriptionRenewedKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                             `json:"aggregationKey,omitempty"`
+	Kind           EventBillingSubscriptionRenewedKind `json:"kind"`
+	Params         struct {
 		Amount      *string `json:"amount,omitempty"`
 		ChargedOn   *string `json:"chargedOn,omitempty"`
 		Currency    *string `json:"currency,omitempty"`
@@ -1357,8 +1391,10 @@ type EventBillingSubscriptionRenewedParamsPlanType string
 
 // EventBillingTrialEnding defines model for Event_BillingTrialEnding.
 type EventBillingTrialEnding struct {
-	Kind   EventBillingTrialEndingKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                     `json:"aggregationKey,omitempty"`
+	Kind           EventBillingTrialEndingKind `json:"kind"`
+	Params         struct {
 		// DaysLeft Days remaining as a string for safe template interpolation.
 		DaysLeft string `json:"daysLeft"`
 		EndDate  string `json:"endDate"`
@@ -1372,8 +1408,10 @@ type EventBillingTrialEndingKind string
 
 // EventCreditsAdded defines model for Event_CreditsAdded.
 type EventCreditsAdded struct {
-	Kind   EventCreditsAddedKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string               `json:"aggregationKey,omitempty"`
+	Kind           EventCreditsAddedKind `json:"kind"`
+	Params         struct {
 		AddedCount  string  `json:"addedCount"`
 		Amount      *string `json:"amount,omitempty"`
 		ChargedOn   *string `json:"chargedOn,omitempty"`
@@ -1394,8 +1432,10 @@ type EventCreditsAddedKind string
 
 // EventCreditsDepleted defines model for Event_CreditsDepleted.
 type EventCreditsDepleted struct {
-	Kind   EventCreditsDepletedKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                  `json:"aggregationKey,omitempty"`
+	Kind           EventCreditsDepletedKind `json:"kind"`
+	Params         struct {
 		ResetDate string `json:"resetDate"`
 	} `json:"params"`
 	RouteParams *map[string]string `json:"routeParams,omitempty"`
@@ -1407,8 +1447,10 @@ type EventCreditsDepletedKind string
 
 // EventCreditsLow defines model for Event_CreditsLow.
 type EventCreditsLow struct {
-	Kind   EventCreditsLowKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string             `json:"aggregationKey,omitempty"`
+	Kind           EventCreditsLowKind `json:"kind"`
+	Params         struct {
 		Remaining string `json:"remaining"`
 		ResetDate string `json:"resetDate"`
 	} `json:"params"`
@@ -1421,8 +1463,10 @@ type EventCreditsLowKind string
 
 // EventCreditsMonthlyReset defines model for Event_CreditsMonthlyReset.
 type EventCreditsMonthlyReset struct {
-	Kind   EventCreditsMonthlyResetKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                      `json:"aggregationKey,omitempty"`
+	Kind           EventCreditsMonthlyResetKind `json:"kind"`
+	Params         struct {
 		NewBalance string `json:"newBalance"`
 	} `json:"params"`
 	RouteParams *map[string]string `json:"routeParams,omitempty"`
@@ -1434,8 +1478,10 @@ type EventCreditsMonthlyResetKind string
 
 // EventDocumentAiComplete defines model for Event_DocumentAiComplete.
 type EventDocumentAiComplete struct {
-	Kind   EventDocumentAiCompleteKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                     `json:"aggregationKey,omitempty"`
+	Kind           EventDocumentAiCompleteKind `json:"kind"`
+	Params         struct {
 		ResumeTitle string `json:"resumeTitle"`
 	} `json:"params"`
 	RouteParams *map[string]string `json:"routeParams,omitempty"`
@@ -1447,8 +1493,10 @@ type EventDocumentAiCompleteKind string
 
 // EventDocumentDownloadReady defines model for Event_DocumentDownloadReady.
 type EventDocumentDownloadReady struct {
-	Kind   EventDocumentDownloadReadyKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                        `json:"aggregationKey,omitempty"`
+	Kind           EventDocumentDownloadReadyKind `json:"kind"`
+	Params         struct {
 		ResumeTitle string `json:"resumeTitle"`
 	} `json:"params"`
 	RouteParams *map[string]string `json:"routeParams,omitempty"`
@@ -1466,8 +1514,10 @@ type EventDocumentDownloadReadyKind string
 // `commentCount` is the cumulative count computed by the backend at
 // publish time (single source of truth).
 type EventDocumentReviewCommentReceived struct {
-	Kind   EventDocumentReviewCommentReceivedKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                                `json:"aggregationKey,omitempty"`
+	Kind           EventDocumentReviewCommentReceivedKind `json:"kind"`
+	Params         struct {
 		CareerSiteId string `json:"careerSiteId"`
 		CommentCount int    `json:"commentCount"`
 		ResumeTitle  string `json:"resumeTitle"`
@@ -1482,8 +1532,10 @@ type EventDocumentReviewCommentReceivedKind string
 
 // EventDocumentSharedByYou defines model for Event_DocumentSharedByYou.
 type EventDocumentSharedByYou struct {
-	Kind   EventDocumentSharedByYouKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                      `json:"aggregationKey,omitempty"`
+	Kind           EventDocumentSharedByYouKind `json:"kind"`
+	Params         struct {
 		ResumeTitle string `json:"resumeTitle"`
 	} `json:"params"`
 	RouteParams *map[string]string `json:"routeParams,omitempty"`
@@ -1495,8 +1547,10 @@ type EventDocumentSharedByYouKind string
 
 // EventDocumentTailorComplete defines model for Event_DocumentTailorComplete.
 type EventDocumentTailorComplete struct {
-	Kind   EventDocumentTailorCompleteKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                         `json:"aggregationKey,omitempty"`
+	Kind           EventDocumentTailorCompleteKind `json:"kind"`
+	Params         struct {
 		Company string `json:"company"`
 
 		// MatchScore Optional — interpolated when present.
@@ -1512,8 +1566,10 @@ type EventDocumentTailorCompleteKind string
 
 // EventDocumentTailorCompleteFailed defines model for Event_DocumentTailorCompleteFailed.
 type EventDocumentTailorCompleteFailed struct {
-	Kind   EventDocumentTailorCompleteFailedKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                               `json:"aggregationKey,omitempty"`
+	Kind           EventDocumentTailorCompleteFailedKind `json:"kind"`
+	Params         struct {
 		// Company May be empty string when caller doesn't have a company name.
 		Company *string `json:"company,omitempty"`
 		Role    string  `json:"role"`
@@ -1527,8 +1583,10 @@ type EventDocumentTailorCompleteFailedKind string
 
 // EventDocumentTailorNoFit defines model for Event_DocumentTailorNoFit.
 type EventDocumentTailorNoFit struct {
-	Kind   EventDocumentTailorNoFitKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                      `json:"aggregationKey,omitempty"`
+	Kind           EventDocumentTailorNoFitKind `json:"kind"`
+	Params         struct {
 		Company *string `json:"company,omitempty"`
 		Role    string  `json:"role"`
 	} `json:"params"`
@@ -1541,8 +1599,10 @@ type EventDocumentTailorNoFitKind string
 
 // EventDocumentViewedByVisitor defines model for Event_DocumentViewedByVisitor.
 type EventDocumentViewedByVisitor struct {
-	Kind   EventDocumentViewedByVisitorKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                          `json:"aggregationKey,omitempty"`
+	Kind           EventDocumentViewedByVisitorKind `json:"kind"`
+	Params         struct {
 		VisitorLocation string `json:"visitorLocation"`
 	} `json:"params"`
 	RouteParams *map[string]string `json:"routeParams,omitempty"`
@@ -1554,10 +1614,12 @@ type EventDocumentViewedByVisitorKind string
 
 // EventEngagementFirstResumeIncomplete defines model for Event_EngagementFirstResumeIncomplete.
 type EventEngagementFirstResumeIncomplete struct {
-	Kind        EventEngagementFirstResumeIncompleteKind `json:"kind"`
-	Params      map[string]interface{}                   `json:"params"`
-	RouteParams *map[string]string                       `json:"routeParams,omitempty"`
-	UserId      openapi_types.UUID                       `json:"userId"`
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                                  `json:"aggregationKey,omitempty"`
+	Kind           EventEngagementFirstResumeIncompleteKind `json:"kind"`
+	Params         map[string]interface{}                   `json:"params"`
+	RouteParams    *map[string]string                       `json:"routeParams,omitempty"`
+	UserId         openapi_types.UUID                       `json:"userId"`
 }
 
 // EventEngagementFirstResumeIncompleteKind defines model for EventEngagementFirstResumeIncomplete.Kind.
@@ -1565,10 +1627,12 @@ type EventEngagementFirstResumeIncompleteKind string
 
 // EventEngagementInactivityNudge defines model for Event_EngagementInactivityNudge.
 type EventEngagementInactivityNudge struct {
-	Kind        EventEngagementInactivityNudgeKind `json:"kind"`
-	Params      map[string]interface{}             `json:"params"`
-	RouteParams *map[string]string                 `json:"routeParams,omitempty"`
-	UserId      openapi_types.UUID                 `json:"userId"`
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                            `json:"aggregationKey,omitempty"`
+	Kind           EventEngagementInactivityNudgeKind `json:"kind"`
+	Params         map[string]interface{}             `json:"params"`
+	RouteParams    *map[string]string                 `json:"routeParams,omitempty"`
+	UserId         openapi_types.UUID                 `json:"userId"`
 }
 
 // EventEngagementInactivityNudgeKind defines model for EventEngagementInactivityNudge.Kind.
@@ -1576,10 +1640,12 @@ type EventEngagementInactivityNudgeKind string
 
 // EventEngagementLinkedinUpdateReminder defines model for Event_EngagementLinkedinUpdateReminder.
 type EventEngagementLinkedinUpdateReminder struct {
-	Kind        EventEngagementLinkedinUpdateReminderKind `json:"kind"`
-	Params      map[string]interface{}                    `json:"params"`
-	RouteParams *map[string]string                        `json:"routeParams,omitempty"`
-	UserId      openapi_types.UUID                        `json:"userId"`
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                                   `json:"aggregationKey,omitempty"`
+	Kind           EventEngagementLinkedinUpdateReminderKind `json:"kind"`
+	Params         map[string]interface{}                    `json:"params"`
+	RouteParams    *map[string]string                        `json:"routeParams,omitempty"`
+	UserId         openapi_types.UUID                        `json:"userId"`
 }
 
 // EventEngagementLinkedinUpdateReminderKind defines model for EventEngagementLinkedinUpdateReminder.Kind.
@@ -1587,8 +1653,10 @@ type EventEngagementLinkedinUpdateReminderKind string
 
 // EventEngagementOnboardingIncomplete defines model for Event_EngagementOnboardingIncomplete.
 type EventEngagementOnboardingIncomplete struct {
-	Kind   EventEngagementOnboardingIncompleteKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                                 `json:"aggregationKey,omitempty"`
+	Kind           EventEngagementOnboardingIncompleteKind `json:"kind"`
+	Params         struct {
 		StepsLeft string `json:"stepsLeft"`
 	} `json:"params"`
 	RouteParams *map[string]string `json:"routeParams,omitempty"`
@@ -1600,10 +1668,12 @@ type EventEngagementOnboardingIncompleteKind string
 
 // EventEngagementWeeklyTip defines model for Event_EngagementWeeklyTip.
 type EventEngagementWeeklyTip struct {
-	Kind        EventEngagementWeeklyTipKind `json:"kind"`
-	Params      map[string]interface{}       `json:"params"`
-	RouteParams *map[string]string           `json:"routeParams,omitempty"`
-	UserId      openapi_types.UUID           `json:"userId"`
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                      `json:"aggregationKey,omitempty"`
+	Kind           EventEngagementWeeklyTipKind `json:"kind"`
+	Params         map[string]interface{}       `json:"params"`
+	RouteParams    *map[string]string           `json:"routeParams,omitempty"`
+	UserId         openapi_types.UUID           `json:"userId"`
 }
 
 // EventEngagementWeeklyTipKind defines model for EventEngagementWeeklyTip.Kind.
@@ -1611,8 +1681,10 @@ type EventEngagementWeeklyTipKind string
 
 // EventFeedbackBetaFeedback defines model for Event_FeedbackBetaFeedback.
 type EventFeedbackBetaFeedback struct {
-	Kind   EventFeedbackBetaFeedbackKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                       `json:"aggregationKey,omitempty"`
+	Kind           EventFeedbackBetaFeedbackKind `json:"kind"`
+	Params         struct {
 		BetaName string `json:"betaName"`
 	} `json:"params"`
 	RouteParams *map[string]string `json:"routeParams,omitempty"`
@@ -1624,8 +1696,10 @@ type EventFeedbackBetaFeedbackKind string
 
 // EventFeedbackFeatureFeedback defines model for Event_FeedbackFeatureFeedback.
 type EventFeedbackFeatureFeedback struct {
-	Kind   EventFeedbackFeatureFeedbackKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                          `json:"aggregationKey,omitempty"`
+	Kind           EventFeedbackFeatureFeedbackKind `json:"kind"`
+	Params         struct {
 		FeatureName string `json:"featureName"`
 	} `json:"params"`
 	RouteParams *map[string]string `json:"routeParams,omitempty"`
@@ -1637,10 +1711,12 @@ type EventFeedbackFeatureFeedbackKind string
 
 // EventFeedbackNpsSurvey defines model for Event_FeedbackNpsSurvey.
 type EventFeedbackNpsSurvey struct {
-	Kind        EventFeedbackNpsSurveyKind `json:"kind"`
-	Params      map[string]interface{}     `json:"params"`
-	RouteParams *map[string]string         `json:"routeParams,omitempty"`
-	UserId      openapi_types.UUID         `json:"userId"`
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                    `json:"aggregationKey,omitempty"`
+	Kind           EventFeedbackNpsSurveyKind `json:"kind"`
+	Params         map[string]interface{}     `json:"params"`
+	RouteParams    *map[string]string         `json:"routeParams,omitempty"`
+	UserId         openapi_types.UUID         `json:"userId"`
 }
 
 // EventFeedbackNpsSurveyKind defines model for EventFeedbackNpsSurvey.Kind.
@@ -1648,10 +1724,12 @@ type EventFeedbackNpsSurveyKind string
 
 // EventFeedbackRawPrompt defines model for Event_FeedbackRawPrompt.
 type EventFeedbackRawPrompt struct {
-	Kind        EventFeedbackRawPromptKind `json:"kind"`
-	Params      map[string]interface{}     `json:"params"`
-	RouteParams *map[string]string         `json:"routeParams,omitempty"`
-	UserId      openapi_types.UUID         `json:"userId"`
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                    `json:"aggregationKey,omitempty"`
+	Kind           EventFeedbackRawPromptKind `json:"kind"`
+	Params         map[string]interface{}     `json:"params"`
+	RouteParams    *map[string]string         `json:"routeParams,omitempty"`
+	UserId         openapi_types.UUID         `json:"userId"`
 }
 
 // EventFeedbackRawPromptKind defines model for EventFeedbackRawPrompt.Kind.
@@ -1659,10 +1737,12 @@ type EventFeedbackRawPromptKind string
 
 // EventFeedbackTrustpilotRequest defines model for Event_FeedbackTrustpilotRequest.
 type EventFeedbackTrustpilotRequest struct {
-	Kind        EventFeedbackTrustpilotRequestKind `json:"kind"`
-	Params      map[string]interface{}             `json:"params"`
-	RouteParams *map[string]string                 `json:"routeParams,omitempty"`
-	UserId      openapi_types.UUID                 `json:"userId"`
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                            `json:"aggregationKey,omitempty"`
+	Kind           EventFeedbackTrustpilotRequestKind `json:"kind"`
+	Params         map[string]interface{}             `json:"params"`
+	RouteParams    *map[string]string                 `json:"routeParams,omitempty"`
+	UserId         openapi_types.UUID                 `json:"userId"`
 }
 
 // EventFeedbackTrustpilotRequestKind defines model for EventFeedbackTrustpilotRequest.Kind.
@@ -1670,10 +1750,12 @@ type EventFeedbackTrustpilotRequestKind string
 
 // EventLegalCookieUpdated defines model for Event_LegalCookieUpdated.
 type EventLegalCookieUpdated struct {
-	Kind        EventLegalCookieUpdatedKind `json:"kind"`
-	Params      map[string]interface{}      `json:"params"`
-	RouteParams *map[string]string          `json:"routeParams,omitempty"`
-	UserId      openapi_types.UUID          `json:"userId"`
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                     `json:"aggregationKey,omitempty"`
+	Kind           EventLegalCookieUpdatedKind `json:"kind"`
+	Params         map[string]interface{}      `json:"params"`
+	RouteParams    *map[string]string          `json:"routeParams,omitempty"`
+	UserId         openapi_types.UUID          `json:"userId"`
 }
 
 // EventLegalCookieUpdatedKind defines model for EventLegalCookieUpdated.Kind.
@@ -1681,10 +1763,12 @@ type EventLegalCookieUpdatedKind string
 
 // EventLegalGdprDeletionConfirmed defines model for Event_LegalGdprDeletionConfirmed.
 type EventLegalGdprDeletionConfirmed struct {
-	Kind        EventLegalGdprDeletionConfirmedKind `json:"kind"`
-	Params      map[string]interface{}              `json:"params"`
-	RouteParams *map[string]string                  `json:"routeParams,omitempty"`
-	UserId      openapi_types.UUID                  `json:"userId"`
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                             `json:"aggregationKey,omitempty"`
+	Kind           EventLegalGdprDeletionConfirmedKind `json:"kind"`
+	Params         map[string]interface{}              `json:"params"`
+	RouteParams    *map[string]string                  `json:"routeParams,omitempty"`
+	UserId         openapi_types.UUID                  `json:"userId"`
 }
 
 // EventLegalGdprDeletionConfirmedKind defines model for EventLegalGdprDeletionConfirmed.Kind.
@@ -1692,8 +1776,10 @@ type EventLegalGdprDeletionConfirmedKind string
 
 // EventLegalGdprExportReady defines model for Event_LegalGdprExportReady.
 type EventLegalGdprExportReady struct {
-	Kind   EventLegalGdprExportReadyKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                       `json:"aggregationKey,omitempty"`
+	Kind           EventLegalGdprExportReadyKind `json:"kind"`
+	Params         struct {
 		AvailableUntil string `json:"availableUntil"`
 	} `json:"params"`
 	RouteParams *map[string]string `json:"routeParams,omitempty"`
@@ -1705,8 +1791,10 @@ type EventLegalGdprExportReadyKind string
 
 // EventLegalPrivacyUpdated defines model for Event_LegalPrivacyUpdated.
 type EventLegalPrivacyUpdated struct {
-	Kind   EventLegalPrivacyUpdatedKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                      `json:"aggregationKey,omitempty"`
+	Kind           EventLegalPrivacyUpdatedKind `json:"kind"`
+	Params         struct {
 		EffectiveDate string `json:"effectiveDate"`
 	} `json:"params"`
 	RouteParams *map[string]string `json:"routeParams,omitempty"`
@@ -1718,8 +1806,10 @@ type EventLegalPrivacyUpdatedKind string
 
 // EventLegalTermsUpdated defines model for Event_LegalTermsUpdated.
 type EventLegalTermsUpdated struct {
-	Kind   EventLegalTermsUpdatedKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                    `json:"aggregationKey,omitempty"`
+	Kind           EventLegalTermsUpdatedKind `json:"kind"`
+	Params         struct {
 		EffectiveDate string `json:"effectiveDate"`
 	} `json:"params"`
 	RouteParams *map[string]string `json:"routeParams,omitempty"`
@@ -1731,8 +1821,10 @@ type EventLegalTermsUpdatedKind string
 
 // EventReferralCreditsEarned defines model for Event_ReferralCreditsEarned.
 type EventReferralCreditsEarned struct {
-	Kind   EventReferralCreditsEarnedKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                        `json:"aggregationKey,omitempty"`
+	Kind           EventReferralCreditsEarnedKind `json:"kind"`
+	Params         struct {
 		Credits    string `json:"credits"`
 		FriendName string `json:"friendName"`
 	} `json:"params"`
@@ -1745,8 +1837,10 @@ type EventReferralCreditsEarnedKind string
 
 // EventReferralFriendSignedUp defines model for Event_ReferralFriendSignedUp.
 type EventReferralFriendSignedUp struct {
-	Kind   EventReferralFriendSignedUpKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                         `json:"aggregationKey,omitempty"`
+	Kind           EventReferralFriendSignedUpKind `json:"kind"`
+	Params         struct {
 		FriendName string `json:"friendName"`
 	} `json:"params"`
 	RouteParams *map[string]string `json:"routeParams,omitempty"`
@@ -1758,8 +1852,10 @@ type EventReferralFriendSignedUpKind string
 
 // EventReferralThresholdReached defines model for Event_ReferralThresholdReached.
 type EventReferralThresholdReached struct {
-	Kind   EventReferralThresholdReachedKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                           `json:"aggregationKey,omitempty"`
+	Kind           EventReferralThresholdReachedKind `json:"kind"`
+	Params         struct {
 		Count  string `json:"count"`
 		Reward string `json:"reward"`
 	} `json:"params"`
@@ -1772,8 +1868,10 @@ type EventReferralThresholdReachedKind string
 
 // EventSystemFeatureAnnouncement defines model for Event_SystemFeatureAnnouncement.
 type EventSystemFeatureAnnouncement struct {
-	Kind   EventSystemFeatureAnnouncementKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                            `json:"aggregationKey,omitempty"`
+	Kind           EventSystemFeatureAnnouncementKind `json:"kind"`
+	Params         struct {
 		FeatureFullDescription string `json:"featureFullDescription"`
 		FeatureName            string `json:"featureName"`
 		FeatureSummary         string `json:"featureSummary"`
@@ -1787,8 +1885,10 @@ type EventSystemFeatureAnnouncementKind string
 
 // EventSystemScheduledMaintenance defines model for Event_SystemScheduledMaintenance.
 type EventSystemScheduledMaintenance struct {
-	Kind   EventSystemScheduledMaintenanceKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                             `json:"aggregationKey,omitempty"`
+	Kind           EventSystemScheduledMaintenanceKind `json:"kind"`
+	Params         struct {
 		Date      string `json:"date"`
 		EndTime   string `json:"endTime"`
 		StartTime string `json:"startTime"`
@@ -1803,8 +1903,10 @@ type EventSystemScheduledMaintenanceKind string
 
 // EventSystemServiceRestored defines model for Event_SystemServiceRestored.
 type EventSystemServiceRestored struct {
-	Kind   EventSystemServiceRestoredKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                        `json:"aggregationKey,omitempty"`
+	Kind           EventSystemServiceRestoredKind `json:"kind"`
+	Params         struct {
 		AffectedService string `json:"affectedService"`
 	} `json:"params"`
 	RouteParams *map[string]string `json:"routeParams,omitempty"`
@@ -1816,8 +1918,10 @@ type EventSystemServiceRestoredKind string
 
 // EventTrackerApplicationReminder defines model for Event_TrackerApplicationReminder.
 type EventTrackerApplicationReminder struct {
-	Kind   EventTrackerApplicationReminderKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                             `json:"aggregationKey,omitempty"`
+	Kind           EventTrackerApplicationReminderKind `json:"kind"`
+	Params         struct {
 		Count string `json:"count"`
 	} `json:"params"`
 	RouteParams *map[string]string `json:"routeParams,omitempty"`
@@ -1829,8 +1933,10 @@ type EventTrackerApplicationReminderKind string
 
 // EventTrackerDeadlineApproaching defines model for Event_TrackerDeadlineApproaching.
 type EventTrackerDeadlineApproaching struct {
-	Kind   EventTrackerDeadlineApproachingKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                             `json:"aggregationKey,omitempty"`
+	Kind           EventTrackerDeadlineApproachingKind `json:"kind"`
+	Params         struct {
 		CloseDate string `json:"closeDate"`
 		Company   string `json:"company"`
 		DaysLeft  string `json:"daysLeft"`
@@ -1845,8 +1951,10 @@ type EventTrackerDeadlineApproachingKind string
 
 // EventTrackerFollowupDue defines model for Event_TrackerFollowupDue.
 type EventTrackerFollowupDue struct {
-	Kind   EventTrackerFollowupDueKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                     `json:"aggregationKey,omitempty"`
+	Kind           EventTrackerFollowupDueKind `json:"kind"`
+	Params         struct {
 		Company string `json:"company"`
 		Days    string `json:"days"`
 	} `json:"params"`
@@ -1859,8 +1967,10 @@ type EventTrackerFollowupDueKind string
 
 // EventTrackerInterviewScheduled defines model for Event_TrackerInterviewScheduled.
 type EventTrackerInterviewScheduled struct {
-	Kind   EventTrackerInterviewScheduledKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                            `json:"aggregationKey,omitempty"`
+	Kind           EventTrackerInterviewScheduledKind `json:"kind"`
+	Params         struct {
 		Company string `json:"company"`
 		Date    string `json:"date"`
 		Time    string `json:"time"`
@@ -1875,8 +1985,10 @@ type EventTrackerInterviewScheduledKind string
 
 // EventTrackerStatusChanged defines model for Event_TrackerStatusChanged.
 type EventTrackerStatusChanged struct {
-	Kind   EventTrackerStatusChangedKind `json:"kind"`
-	Params struct {
+	// AggregationKey Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+	AggregationKey *string                       `json:"aggregationKey,omitempty"`
+	Kind           EventTrackerStatusChangedKind `json:"kind"`
+	Params         struct {
 		Company   string `json:"company"`
 		NewStatus string `json:"newStatus"`
 	} `json:"params"`
