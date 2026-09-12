@@ -35,9 +35,9 @@ data class Styling(
      */
     val font: String? = null,
     /**
-     * Body font size in points.
+     * Body font size in points. Fractional values are valid (the builders step by 0.25).
      */
-    val fontSize: Int? = null,
+    val fontSize: Double? = null,
     /**
      * Page margin in points.
      */

@@ -334,11 +334,20 @@ components:
                     - { type: number }
                     - { type: boolean }
 
+    # Year-only (`YYYY`) is a FIRST-CLASS value here, not a tolerated defect:
+    # the AI parser emits it when a source resume lists only years, the web
+    # app's legacy→V1 mapper passes it through deliberately
+    # (`toMonthDate`), and the document renderer formats it as the bare year
+    # (`formatDate`). Requiring a month rejected documents the product itself
+    # writes, which broke saving an edit to any resume holding one. Never
+    # "repair" such a value by inventing a month — that fabricates a date the
+    # user never gave. Kept as one component (not renamed) so generated type
+    # names across Go/TS/Kotlin stay stable.
     MonthDate:
       type: string
-      pattern: '^\d{4}-(0[1-9]|1[0-2])$'
+      pattern: '^\d{4}(-(0[1-9]|1[0-2]))?$'
       example: '2024-03'
-      description: Month precision (YYYY-MM). Use null endDate + current=true for ongoing entries.
+      description: Month precision (YYYY-MM), or year-only (YYYY) when the source states no month. Use null endDate + current=true for ongoing entries.
 
     TemplateColors:
       type: object
@@ -418,11 +427,17 @@ components:
           type: string
           description: Font family override. Falls back to the template's default.
           example: Grift
+        # Fractional and down to 6pt by design: the builders' font-size
+        # stepper moves in 0.25pt increments over [6, 16] — the canonical
+        # DEFAULT_TEMPLATE_BOUNDS.fontSize in the document renderer — so real
+        # documents carry values like 7.75. Typed `integer` with `minimum: 8`,
+        # this schema rejected documents the product itself writes.
         fontSize:
-          type: integer
-          description: Body font size in points.
-          minimum: 8
+          type: number
+          description: Body font size in points. Fractional values are valid (the builders step by 0.25).
+          minimum: 6
           maximum: 16
+          example: 7.75
         margin:
           type: number
           description: Page margin in points.

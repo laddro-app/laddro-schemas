@@ -10,4 +10,8 @@ import kotlinx.serialization.json.JsonObject
 data class BaseEvent(
     val userId: String,
     val routeParams: JsonObject? = null,
+    /**
+     * Optional grouping key on the envelope (never a param). When set, repeat events carrying the same key collapse into a single live inbox row (UPSERT) instead of appending a new one. Leave unset for normal one-shot kinds. The per-kind docs below already reference this field; it was documented but never declared.
+     */
+    val aggregationKey: String? = null,
 )

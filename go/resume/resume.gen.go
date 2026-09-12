@@ -272,10 +272,10 @@ type ActivityItem struct {
 	// Description HTML allowed.
 	Description *string `json:"description,omitempty"`
 
-	// EndDate Month precision (YYYY-MM). Use null endDate + current=true for ongoing entries.
+	// EndDate Month precision (YYYY-MM), or year-only (YYYY) when the source states no month. Use null endDate + current=true for ongoing entries.
 	EndDate *MonthDate `json:"endDate,omitempty"`
 
-	// StartDate Month precision (YYYY-MM). Use null endDate + current=true for ongoing entries.
+	// StartDate Month precision (YYYY-MM), or year-only (YYYY) when the source states no month. Use null endDate + current=true for ongoing entries.
 	StartDate *MonthDate `json:"startDate,omitempty"`
 }
 
@@ -286,11 +286,11 @@ type CertificationItem struct {
 	// Description HTML allowed.
 	Description *string `json:"description,omitempty"`
 
-	// EndDate Month precision (YYYY-MM). Use null endDate + current=true for ongoing entries.
+	// EndDate Month precision (YYYY-MM), or year-only (YYYY) when the source states no month. Use null endDate + current=true for ongoing entries.
 	EndDate     *MonthDate `json:"endDate,omitempty"`
 	Institution *string    `json:"institution,omitempty"`
 
-	// StartDate Month precision (YYYY-MM). Use null endDate + current=true for ongoing entries.
+	// StartDate Month precision (YYYY-MM), or year-only (YYYY) when the source states no month. Use null endDate + current=true for ongoing entries.
 	StartDate *MonthDate `json:"startDate,omitempty"`
 }
 
@@ -341,12 +341,12 @@ type EducationItem struct {
 	// Description HTML allowed.
 	Description *string `json:"description,omitempty"`
 
-	// EndDate Month precision (YYYY-MM). Use null endDate + current=true for ongoing entries.
+	// EndDate Month precision (YYYY-MM), or year-only (YYYY) when the source states no month. Use null endDate + current=true for ongoing entries.
 	EndDate     *MonthDate `json:"endDate,omitempty"`
 	Institution string     `json:"institution"`
 	Major       *string    `json:"major,omitempty"`
 
-	// StartDate Month precision (YYYY-MM). Use null endDate + current=true for ongoing entries.
+	// StartDate Month precision (YYYY-MM), or year-only (YYYY) when the source states no month. Use null endDate + current=true for ongoing entries.
 	StartDate *MonthDate `json:"startDate,omitempty"`
 }
 
@@ -369,11 +369,11 @@ type EmploymentItem struct {
 	// Description HTML allowed (paragraphs and lists).
 	Description *string `json:"description,omitempty"`
 
-	// EndDate Month precision (YYYY-MM). Use null endDate + current=true for ongoing entries.
+	// EndDate Month precision (YYYY-MM), or year-only (YYYY) when the source states no month. Use null endDate + current=true for ongoing entries.
 	EndDate  *MonthDate `json:"endDate,omitempty"`
 	Position string     `json:"position"`
 
-	// StartDate Month precision (YYYY-MM). Use null endDate + current=true for ongoing entries.
+	// StartDate Month precision (YYYY-MM), or year-only (YYYY) when the source states no month. Use null endDate + current=true for ongoing entries.
 	StartDate *MonthDate `json:"startDate,omitempty"`
 }
 
@@ -417,7 +417,7 @@ type LanguagesSection struct {
 // LanguagesSectionType defines model for LanguagesSection.Type.
 type LanguagesSectionType string
 
-// MonthDate Month precision (YYYY-MM). Use null endDate + current=true for ongoing entries.
+// MonthDate Month precision (YYYY-MM), or year-only (YYYY) when the source states no month. Use null endDate + current=true for ongoing entries.
 type MonthDate = string
 
 // PersonalSection defines model for PersonalSection.
@@ -449,10 +449,10 @@ type ProjectItem struct {
 	// Description HTML allowed.
 	Description *string `json:"description,omitempty"`
 
-	// EndDate Month precision (YYYY-MM). Use null endDate + current=true for ongoing entries.
+	// EndDate Month precision (YYYY-MM), or year-only (YYYY) when the source states no month. Use null endDate + current=true for ongoing entries.
 	EndDate *MonthDate `json:"endDate,omitempty"`
 
-	// StartDate Month precision (YYYY-MM). Use null endDate + current=true for ongoing entries.
+	// StartDate Month precision (YYYY-MM), or year-only (YYYY) when the source states no month. Use null endDate + current=true for ongoing entries.
 	StartDate *MonthDate `json:"startDate,omitempty"`
 	Title     string     `json:"title"`
 
@@ -587,8 +587,8 @@ type Styling struct {
 	// Font Font family override. Falls back to the template's default.
 	Font *string `json:"font,omitempty"`
 
-	// FontSize Body font size in points.
-	FontSize *int `json:"fontSize,omitempty"`
+	// FontSize Body font size in points. Fractional values are valid (the builders step by 0.25).
+	FontSize *float32 `json:"fontSize,omitempty"`
 
 	// LineHeight Body line-height multiplier (e.g. 1.2, 1.4).
 	LineHeight *float32 `json:"lineHeight,omitempty"`
