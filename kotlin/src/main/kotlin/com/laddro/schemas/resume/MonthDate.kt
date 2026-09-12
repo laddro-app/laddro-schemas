@@ -5,6 +5,6 @@ package com.laddro.schemas.resume
 
 
 /**
- * Month precision (YYYY-MM). Use null endDate + current=true for ongoing entries.
+ * Month precision (YYYY-MM), or year-only (YYYY) when the source states no month. Use null endDate + current=true for ongoing entries.
  */
 typealias MonthDate = String
